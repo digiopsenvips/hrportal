@@ -19,8 +19,7 @@ import {
   User,
   ChevronLeft,
   ChevronRight,
-  Shield,
-  Clock,
+  UserPlus,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -41,7 +40,7 @@ export function Sidebar({
 
   const navItems = [
     {
-      label: 'Society Dashboard',
+      label: 'HR Dashboard',
       href: '/dashboard',
       icon: LayoutDashboard,
       badge: 'Live',
@@ -52,7 +51,7 @@ export function Sidebar({
       icon: User,
     },
     {
-      label: 'Member Directory',
+      label: 'Member Management',
       href: '/members',
       icon: Users,
     },
@@ -60,15 +59,14 @@ export function Sidebar({
       label: 'Visual Organogram',
       href: '/organogram',
       icon: Network,
-      highlight: true,
     },
     {
-      label: 'Meeting Minutes (MOM)',
+      label: 'Minutes of Meeting (MoM)',
       href: '/moms',
       icon: FileText,
     },
     {
-      label: 'Calendar & Meetings',
+      label: 'Meetings & Calendar',
       href: '/calendar',
       icon: Calendar,
     },
@@ -78,7 +76,7 @@ export function Sidebar({
       icon: ClipboardCheck,
     },
     {
-      label: 'HR Task Board',
+      label: 'Task Management',
       href: '/tasks',
       icon: CheckSquare,
     },
@@ -86,7 +84,6 @@ export function Sidebar({
       label: 'HR Leaderboard',
       href: '/leaderboard',
       icon: Trophy,
-      badge: 'Weighted',
     },
     {
       label: 'Departments (8 Hubs)',
@@ -94,7 +91,7 @@ export function Sidebar({
       icon: Building2,
     },
     {
-      label: 'Events & Notices',
+      label: 'Notices & Events',
       href: '/events',
       icon: Megaphone,
     },
@@ -108,32 +105,30 @@ export function Sidebar({
 
   return (
     <>
-      {/* Mobile backdrop */}
       {mobileOpen && (
         <div
           onClick={onCloseMobile}
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden"
+          className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm md:hidden"
         />
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex flex-col border-r border-slate-800 bg-slate-900/95 transition-all duration-300 md:static ${
+        className={`fixed inset-y-0 left-0 z-50 flex flex-col border-r border-[#E3EBE7] bg-white transition-all duration-300 md:static ${
           mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         } ${collapsed ? 'w-20' : 'w-64'}`}
       >
-        {/* Top spacer or toggle */}
-        <div className="flex h-16 items-center justify-between px-4 border-b border-slate-800/80">
+        <div className="flex h-16 items-center justify-between px-4 border-b border-[#E3EBE7]">
           {!collapsed && (
             <div className="flex items-center gap-2">
-              <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-xs font-semibold tracking-wide text-slate-300">
-                ACTIVE PORTAL
+              <span className="flex h-2.5 w-2.5 rounded-full bg-[#2FC3A5]" />
+              <span className="text-xs font-black tracking-wider text-[#263832] uppercase">
+                TEAMHUB HR PORTAL
               </span>
             </div>
           )}
           <button
             onClick={onToggleCollapse}
-            className="hidden md:flex h-7 w-7 items-center justify-center rounded-lg border border-slate-700 bg-slate-800 text-slate-400 hover:text-white"
+            className="hidden md:flex h-7 w-7 items-center justify-center rounded-xl border border-[#E3EBE7] bg-[#F7F9F7] text-[#60736C] hover:bg-[#DDF7EF] hover:text-[#263832]"
             title={collapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
           >
             {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
@@ -152,16 +147,16 @@ export function Sidebar({
                 key={item.href}
                 href={item.href}
                 onClick={onCloseMobile}
-                className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-medium transition-all ${
+                className={`group flex items-center gap-3 rounded-2xl px-3.5 py-2.5 text-xs font-semibold transition-all ${
                   isActive
-                    ? 'bg-amber-400 font-semibold text-slate-950 shadow-md shadow-amber-500/20'
-                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                    ? 'bg-[#2FC3A5] text-[#263832] shadow-sm font-bold'
+                    : 'text-[#263832] hover:bg-[#DDF7EF] hover:text-[#064A31]'
                 }`}
                 title={collapsed ? item.label : undefined}
               >
                 <Icon
                   className={`h-5 w-5 shrink-0 transition-colors ${
-                    isActive ? 'text-slate-950' : 'text-slate-400 group-hover:text-amber-400'
+                    isActive ? 'text-[#263832]' : 'text-[#60736C] group-hover:text-[#2FC3A5]'
                   }`}
                 />
                 {!collapsed && (
@@ -169,10 +164,10 @@ export function Sidebar({
                     <span className="truncate">{item.label}</span>
                     {item.badge && (
                       <span
-                        className={`rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ${
+                        className={`rounded px-1.5 py-0.2 text-[9px] font-black uppercase tracking-wider ${
                           isActive
-                            ? 'bg-slate-950 text-amber-300'
-                            : 'bg-amber-400/20 text-amber-300'
+                            ? 'bg-white text-[#263832]'
+                            : 'bg-[#E7F3D7] text-[#064A31]'
                         }`}
                       >
                         {item.badge}
@@ -185,24 +180,24 @@ export function Sidebar({
           })}
         </div>
 
-        {/* Current User Quick Info in Sidebar Footer */}
-        <div className="border-t border-slate-800 p-3">
+        {/* User Card in Footer */}
+        <div className="border-t border-[#E3EBE7] p-3">
           <div
-            className={`flex items-center gap-3 rounded-xl bg-slate-800/50 p-2.5 ${
+            className={`flex items-center gap-3 rounded-2xl bg-[#F7F9F7] p-2.5 ${
               collapsed ? 'justify-center' : ''
             }`}
           >
             <img
               src={currentUser?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100'}
               alt={currentUser?.name || 'User'}
-              className="h-8 w-8 rounded-full border border-amber-400/40 object-cover shrink-0"
+              className="h-8 w-8 rounded-full border border-[#E3EBE7] object-cover shrink-0"
             />
             {!collapsed && (
               <div className="min-w-0 flex-1">
-                <div className="truncate text-xs font-semibold text-white">
+                <div className="truncate text-xs font-bold text-[#263832]">
                   {currentUser?.name || 'Enactus Member'}
                 </div>
-                <div className="truncate text-[10px] text-amber-400">
+                <div className="truncate text-[10px] text-[#60736C]">
                   {currentUser?.roleTitle || 'General Member'}
                 </div>
               </div>

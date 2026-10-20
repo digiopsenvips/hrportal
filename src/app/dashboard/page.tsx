@@ -14,15 +14,15 @@ import {
   CheckSquare,
   AlertCircle,
   Megaphone,
-  TrendingUp,
   Award,
-  Clock,
   ArrowRight,
   ShieldCheck,
   Building2,
   Sparkles,
   ChevronRight,
-  Plus,
+  UserCheck,
+  Clock,
+  Video,
 } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -37,221 +37,173 @@ export default function DashboardPage() {
     events,
     announcements,
     hrLeaderboard,
-    settings,
   } = useData();
 
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
 
-  // Society-wide metrics
-  const totalRegisteredMembers = members.length;
-  const activeMembers = members.filter((m) => m.status === 'Active').length;
+  // Filter pending approvals (strictly for HR Admins)
+  const pendingMembers = members.filter((m) => m.approvalStatus === 'PENDING');
+  const activeMembers = members.filter((m) => m.approvalStatus === 'APPROVED' && m.membershipStatus === 'ACTIVE');
+
+  // Upcoming meetings
   const upcomingMeetings = meetings.filter(
     (m) => m.status === 'Scheduled' && new Date(m.date) >= new Date(new Date().setHours(0, 0, 0, 0))
   );
 
-  // Current month meetings
-  const currentMonthStr = new Date().toISOString().slice(0, 7);
-  const meetingsThisMonth = meetings.filter((m) => m.date.startsWith(currentMonthStr));
-
-  // Pending MOMs: completed meetings that lack an official published MOM
-  const completedMeetings = meetings.filter((m) => m.status === 'Completed');
-  const pendingMoms = moms.filter((m) => m.publicationStatus === 'Pending Review' || m.publicationStatus === 'Draft');
-
   // Tasks statistics
   const completedTasks = tasks.filter((t) => t.status === 'Completed');
   const pendingTasks = tasks.filter((t) => t.status !== 'Completed');
-  const overdueTasks = tasks.filter((t) => {
-    if (t.status === 'Completed') return false;
-    return new Date(t.deadline) < new Date(new Date().setHours(0, 0, 0, 0));
-  });
 
   // Overall Attendance calculation
   const totalAttRecords = attendance.length;
   const presentRecords = attendance.filter((a) => a.status === 'Present' || a.status === 'Late').length;
   const overallAttendanceRate = totalAttRecords > 0 ? Math.round((presentRecords / totalAttRecords) * 100) : 100;
 
-  // Recent announcements (pinned first)
+  // Announcements
   const sortedAnnouncements = [...announcements].sort((a, b) => {
     if (a.isPinned && !b.isPinned) return -1;
     if (!a.isPinned && b.isPinned) return 1;
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
 
-  // Top 3 HR Leaderboard members
-  const topHrMembers = hrLeaderboard.slice(0, 3);
-
   return (
-    <div className="space-y-8">
-      {/* Welcome Banner with Role Tier Indicator */}
-      <div className="relative overflow-hidden rounded-3xl border border-slate-800 bg-gradient-to-r from-slate-900 via-slate-900/90 to-amber-950/30 p-6 md:p-8 shadow-2xl">
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <div className="space-y-6">
+      {/* TeamHub Greeting & Action Banner */}
+      <div className="rounded-3xl border border-[#E3EBE7] bg-white p-6 md:p-8 shadow-sm">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
             <div className="flex items-center gap-2">
-              <span className="rounded-full bg-amber-400/20 px-3 py-1 text-xs font-black uppercase tracking-wider text-amber-400">
+              <span className="rounded-full bg-[#E7F3D7] px-3 py-1 text-xs font-bold text-[#064A31]">
                 {currentUser?.roleTitle || 'Enactus Leader'}
               </span>
-              <span className="text-xs text-slate-400">
-                {currentUser?.primaryDepartmentId ? `Department: ${currentUser.primaryDepartmentId}` : 'Society Central'}
+              <span className="text-xs text-[#60736C]">
+                {currentUser?.primaryDepartmentId ? `Department: ${currentUser.primaryDepartmentId}` : 'Society Operations'}
               </span>
             </div>
-            <h1 className="mt-2 text-2xl md:text-3xl font-extrabold tracking-tight text-white">
-              Welcome back, {currentUser?.name || 'Member'}! 👋
+            <h1 className="mt-2 text-2xl md:text-3xl font-black tracking-tight text-[#263832]">
+              Good morning, {currentUser?.name || 'Member'}! 👋
             </h1>
-            <p className="mt-1 max-w-2xl text-xs md:text-sm text-slate-300">
-              Enactus VIPS-TC Central Management Portal • Real-time synchronization of operations, departmental MOMs, attendance records, and verified task workflows.
+            <p className="mt-1 max-w-2xl text-xs md:text-sm text-[#60736C]">
+              Here is what is happening across Enactus VIPS-TC today. All operations, meetings, and attendance are live.
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
             <Link
               href="/organogram"
-              className="flex items-center gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2 text-xs font-bold text-amber-300 hover:bg-amber-500/20 transition"
+              className="flex items-center gap-2 rounded-2xl border border-[#E3EBE7] bg-[#F7F9F7] px-4 py-2 text-xs font-bold text-[#263832] hover:bg-[#DDF7EF] transition"
             >
-              <Sparkles className="h-4 w-4" />
-              <span>Visual Organogram</span>
+              <Sparkles className="h-4 w-4 text-[#2FC3A5]" />
+              <span>Organogram</span>
             </Link>
             <Link
               href="/calendar"
-              className="flex items-center gap-2 rounded-xl bg-amber-400 px-4 py-2 text-xs font-bold text-slate-950 hover:bg-amber-300 shadow-md shadow-amber-500/20 transition"
+              className="flex items-center gap-2 rounded-2xl bg-[#2FC3A5] px-4 py-2 text-xs font-bold text-[#263832] hover:bg-[#26B396] shadow-sm transition"
             >
               <Calendar className="h-4 w-4" />
               <span>Schedule Meeting</span>
             </Link>
           </div>
         </div>
-
-        {/* Ambient background decoration */}
-        <div className="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-amber-500/10 blur-3xl pointer-events-none" />
       </div>
+
+      {/* HR Admin Pending Registration Action Banner */}
+      {permissions.canManageMembers && pendingMembers.length > 0 && (
+        <div className="rounded-2xl border border-[#2FC3A5]/40 bg-[#DDF7EF]/40 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#2FC3A5] text-[#263832] font-black shrink-0">
+              <UserCheck className="h-5 w-5" />
+            </div>
+            <div>
+              <div className="text-xs font-bold text-[#064A31]">
+                {pendingMembers.length} Registration {pendingMembers.length === 1 ? 'Applicant' : 'Applicants'} Awaiting HR Approval
+              </div>
+              <div className="text-[11px] text-[#60736C]">
+                Review applications in the Member Management approval queue before portal credentials are unlocked.
+              </div>
+            </div>
+          </div>
+          <Link
+            href="/members"
+            className="flex items-center gap-1 rounded-xl bg-white border border-[#E3EBE7] px-3.5 py-1.5 text-xs font-bold text-[#263832] hover:bg-[#F7F9F7] shadow-sm shrink-0"
+          >
+            <span>Review Queue</span>
+            <ChevronRight className="h-4 w-4 text-[#2FC3A5]" />
+          </Link>
+        </div>
+      )}
 
       {/* Primary KPI Metrics Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/80 p-4 shadow-lg">
-          <div className="flex items-center justify-between text-slate-400">
-            <span className="text-xs font-medium">Total Members</span>
-            <Users className="h-4 w-4 text-amber-400" />
+        <div className="rounded-3xl border border-[#E3EBE7] bg-white p-5 shadow-sm">
+          <div className="flex items-center justify-between text-[#60736C]">
+            <span className="text-xs font-semibold">Active Members</span>
+            <div className="p-2 rounded-xl bg-[#E7F3D7] text-[#064A31]">
+              <Users className="h-4 w-4" />
+            </div>
           </div>
-          <div className="mt-2 text-2xl font-black text-white">{totalRegisteredMembers}</div>
-          <div className="mt-1 flex items-center gap-1.5 text-[11px] text-emerald-400 font-semibold">
-            <span>{activeMembers} Active</span>
-            <span className="text-slate-400">• Across 8 Depts</span>
-          </div>
-        </div>
-
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/80 p-4 shadow-lg">
-          <div className="flex items-center justify-between text-slate-400">
-            <span className="text-xs font-medium">Society Quorum</span>
-            <ClipboardCheck className="h-4 w-4 text-emerald-400" />
-          </div>
-          <div className="mt-2 text-2xl font-black text-emerald-400">{overallAttendanceRate}%</div>
-          <div className="mt-1 text-[11px] text-slate-400">
-            {presentRecords} / {totalAttRecords} Attendances Marked
+          <div className="mt-2 text-2xl font-black text-[#263832]">{activeMembers.length}</div>
+          <div className="mt-1 flex items-center gap-1.5 text-[11px] font-semibold text-[#0A875E]">
+            <span>Across 8 Departments</span>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/80 p-4 shadow-lg">
-          <div className="flex items-center justify-between text-slate-400">
-            <span className="text-xs font-medium">Tasks Progress</span>
-            <CheckSquare className="h-4 w-4 text-blue-400" />
+        <div className="rounded-3xl border border-[#E3EBE7] bg-white p-5 shadow-sm">
+          <div className="flex items-center justify-between text-[#60736C]">
+            <span className="text-xs font-semibold">Pending Approvals</span>
+            <div className="p-2 rounded-xl bg-amber-50 text-amber-700">
+              <Clock className="h-4 w-4" />
+            </div>
           </div>
-          <div className="mt-2 text-2xl font-black text-blue-400">
+          <div className="mt-2 text-2xl font-black text-amber-700">{pendingMembers.length}</div>
+          <div className="mt-1 text-[11px] text-[#60736C]">
+            Awaiting HR sign-off
+          </div>
+        </div>
+
+        <div className="rounded-3xl border border-[#E3EBE7] bg-white p-5 shadow-sm">
+          <div className="flex items-center justify-between text-[#60736C]">
+            <span className="text-xs font-semibold">Attendance Quorum</span>
+            <div className="p-2 rounded-xl bg-[#E7F3D7] text-[#064A31]">
+              <ClipboardCheck className="h-4 w-4" />
+            </div>
+          </div>
+          <div className="mt-2 text-2xl font-black text-[#064A31]">{overallAttendanceRate}%</div>
+          <div className="mt-1 text-[11px] text-[#60736C]">
+            {presentRecords} / {totalAttRecords} Meetings Logged
+          </div>
+        </div>
+
+        <div className="rounded-3xl border border-[#E3EBE7] bg-white p-5 shadow-sm">
+          <div className="flex items-center justify-between text-[#60736C]">
+            <span className="text-xs font-semibold">Task Progress</span>
+            <div className="p-2 rounded-xl bg-[#DDF7EF] text-[#064A31]">
+              <CheckSquare className="h-4 w-4" />
+            </div>
+          </div>
+          <div className="mt-2 text-2xl font-black text-[#263832]">
             {completedTasks.length} / {tasks.length}
           </div>
-          <div className="mt-1 flex items-center gap-1.5 text-[11px] text-amber-400">
-            <span>{overdueTasks.length} Overdue</span>
-            <span className="text-slate-400">• {pendingTasks.length} in progress</span>
-          </div>
-        </div>
-
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/80 p-4 shadow-lg">
-          <div className="flex items-center justify-between text-slate-400">
-            <span className="text-xs font-medium">Meetings This Month</span>
-            <Calendar className="h-4 w-4 text-rose-400" />
-          </div>
-          <div className="mt-2 text-2xl font-black text-white">{meetingsThisMonth.length}</div>
-          <div className="mt-1 text-[11px] text-slate-400">
-            {upcomingMeetings.length} Scheduled Upcoming
+          <div className="mt-1 text-[11px] text-[#60736C]">
+            {pendingTasks.length} in progress
           </div>
         </div>
       </div>
 
-      {/* Role-Specific Executive Briefing Section */}
-      {permissions.isPresident && (
-        <div className="rounded-2xl border border-amber-500/40 bg-gradient-to-r from-amber-500/10 via-slate-900 to-slate-900 p-5 shadow-xl">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-amber-400 font-bold text-sm uppercase tracking-wider">
-              <ShieldCheck className="h-5 w-5" />
-              <span>President's Executive Control & Society Health</span>
-            </div>
-            <span className="rounded bg-amber-400/20 px-2 py-0.5 text-[10px] font-bold text-amber-300">
-              Level 1 Authority
-            </span>
-          </div>
-          <p className="mt-2 text-xs text-slate-300">
-            As President, you have full governance across all 8 independent departments. Review all pending MOMs, verify action items, and approve cross-department budgets.
-          </p>
-          <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="rounded-xl border border-slate-800 bg-slate-800/60 p-3">
-              <div className="text-[11px] text-slate-400">Pending MOM Reviews</div>
-              <div className="text-lg font-bold text-amber-400">{pendingMoms.length} Requiring Sign-off</div>
-              <Link href="/moms" className="mt-1 text-[11px] text-amber-400 hover:underline flex items-center gap-1">
-                <span>Review MOMs</span>
-                <ChevronRight className="h-3 w-3" />
-              </Link>
-            </div>
-            <div className="rounded-xl border border-slate-800 bg-slate-800/60 p-3">
-              <div className="text-[11px] text-slate-400">HR Task Verification</div>
-              <div className="text-lg font-bold text-emerald-400">
-                {tasks.filter((t) => t.status === 'Completed' && !t.isVerified).length} Awaiting Verification
-              </div>
-              <Link href="/tasks" className="mt-1 text-[11px] text-emerald-400 hover:underline flex items-center gap-1">
-                <span>Open Task Board</span>
-                <ChevronRight className="h-3 w-3" />
-              </Link>
-            </div>
-            <div className="rounded-xl border border-slate-800 bg-slate-800/60 p-3">
-              <div className="text-[11px] text-slate-400">Department Health</div>
-              <div className="text-lg font-bold text-blue-400">{departments.filter((d) => d.isActive).length} / 8 Active</div>
-              <Link href="/departments" className="mt-1 text-[11px] text-blue-400 hover:underline flex items-center gap-1">
-                <span>View Department Hubs</span>
-                <ChevronRight className="h-3 w-3" />
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {permissions.isVP && (
-        <div className="rounded-2xl border border-blue-500/40 bg-blue-500/5 p-5 shadow-xl">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-blue-400 font-bold text-sm uppercase tracking-wider">
-              <ShieldCheck className="h-5 w-5" />
-              <span>Vice President Project & Operational Supervision</span>
-            </div>
-            <span className="rounded bg-blue-400/20 px-2 py-0.5 text-[10px] font-bold text-blue-300">
-              Level 2 Authority
-            </span>
-          </div>
-          <p className="mt-2 text-xs text-slate-300">
-            Monitoring project bottlenecks, upcoming deadlines, and departmental deliverables across Project Raahat and Project Vridhi.
-          </p>
-        </div>
-      )}
-
-      {/* Department Breakdown & Participation Overview */}
+      {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left 2 Cols: Departments Status Hub */}
+        {/* Left 2 Cols: Departments Performance Hub */}
         <div className="lg:col-span-2 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-base font-bold text-white flex items-center gap-2">
-              <Building2 className="h-4 w-4 text-amber-400" />
-              <span>Departments Performance & Operations</span>
+            <h2 className="text-base font-bold text-[#263832] flex items-center gap-2">
+              <Building2 className="h-4 w-4 text-[#2FC3A5]" />
+              <span>Departmental Operations (8 Hubs)</span>
             </h2>
             <Link
               href="/departments"
-              className="text-xs text-amber-400 hover:underline flex items-center gap-1"
+              className="text-xs text-[#2FC3A5] font-semibold hover:underline flex items-center gap-1"
             >
-              <span>Explore all 8 departments</span>
+              <span>Explore all departments</span>
               <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
@@ -259,7 +211,7 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {departments.map((dept) => {
               const deptMembers = members.filter(
-                (m) => m.primaryDepartmentId === dept.id
+                (m) => m.primaryDepartmentId === dept.id && m.approvalStatus === 'APPROVED'
               );
               const deptHead = members.find(
                 (m) =>
@@ -271,14 +223,13 @@ export default function DashboardPage() {
                   m.role === 'secondary_hr' &&
                   (m.assignedDepartmentId === dept.id || m.primaryDepartmentId === dept.id)
               );
-              const deptMeetings = meetings.filter((m) => m.departmentId === dept.id);
               const deptTasks = tasks.filter((t) => t.departmentId === dept.id);
               const completedDeptTasks = deptTasks.filter((t) => t.status === 'Completed');
 
               return (
                 <div
                   key={dept.id}
-                  className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 hover:border-slate-700 transition"
+                  className="rounded-3xl border border-[#E3EBE7] bg-white p-4 shadow-sm hover:border-[#2FC3A5] transition"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -286,33 +237,33 @@ export default function DashboardPage() {
                         className="h-3 w-3 rounded-full"
                         style={{ backgroundColor: dept.color }}
                       />
-                      <span className="font-bold text-white text-sm">{dept.name}</span>
+                      <span className="font-bold text-[#263832] text-sm">{dept.name}</span>
                     </div>
-                    <span className="rounded bg-slate-800 px-2 py-0.5 text-[10px] font-semibold text-slate-300">
+                    <span className="rounded-full bg-[#E7F3D7] px-2 py-0.5 text-[10px] font-bold text-[#064A31]">
                       {deptMembers.length} members
                     </span>
                   </div>
 
-                  <p className="mt-2 text-xs text-slate-400 line-clamp-2">
+                  <p className="mt-2 text-xs text-[#60736C] line-clamp-2">
                     {dept.description}
                   </p>
 
-                  <div className="mt-3 pt-3 border-t border-slate-800/80 space-y-1 text-[11px]">
-                    <div className="flex justify-between text-slate-400">
+                  <div className="mt-3 pt-3 border-t border-[#E3EBE7] space-y-1 text-[11px]">
+                    <div className="flex justify-between text-[#60736C]">
                       <span>Head:</span>
-                      <span className="font-medium text-slate-200">
+                      <span className="font-semibold text-[#263832]">
                         {deptHead ? deptHead.name : 'Unassigned'}
                       </span>
                     </div>
-                    <div className="flex justify-between text-slate-400">
+                    <div className="flex justify-between text-[#60736C]">
                       <span>Secondary HR:</span>
-                      <span className="font-medium text-rose-300">
+                      <span className="font-semibold text-[#0A875E]">
                         {secondaryHr ? secondaryHr.name : 'Unassigned'}
                       </span>
                     </div>
-                    <div className="flex justify-between text-slate-400">
+                    <div className="flex justify-between text-[#60736C]">
                       <span>Tasks Done:</span>
-                      <span className="font-medium text-emerald-400">
+                      <span className="font-bold text-[#263832]">
                         {completedDeptTasks.length} / {deptTasks.length}
                       </span>
                     </div>
@@ -323,76 +274,65 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Right 1 Col: HR Leaderboard Preview & Announcements */}
+        {/* Right 1 Col: Upcoming Meetings & Announcements */}
         <div className="space-y-6">
-          {/* HR Operations Leaderboard Preview */}
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/80 p-5 shadow-lg">
+          {/* Upcoming Meetings Widget */}
+          <div className="rounded-3xl border border-[#E3EBE7] bg-white p-5 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <Award className="h-5 w-5 text-amber-400" />
-                <h3 className="font-bold text-white text-sm">HR Operations Leaderboard</h3>
+                <Calendar className="h-4 w-4 text-[#2FC3A5]" />
+                <h3 className="font-bold text-[#263832] text-sm">Upcoming Meetings</h3>
               </div>
-              <Link
-                href="/leaderboard"
-                className="text-xs text-amber-400 hover:underline"
-              >
-                Full Standings
+              <Link href="/calendar" className="text-xs font-semibold text-[#2FC3A5] hover:underline">
+                View Calendar
               </Link>
             </div>
 
-            <div className="space-y-3">
-              {topHrMembers.map((hr, idx) => (
-                <div
-                  key={hr.member.id}
-                  onClick={() => setSelectedMember(hr.member)}
-                  className="flex cursor-pointer items-center justify-between rounded-xl border border-slate-800 bg-slate-800/40 p-3 hover:border-amber-400/50 transition"
-                >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`flex h-7 w-7 items-center justify-center rounded-lg font-black text-xs ${
-                        idx === 0
-                          ? 'bg-amber-400 text-slate-950'
-                          : idx === 1
-                          ? 'bg-slate-300 text-slate-950'
-                          : 'bg-amber-700/60 text-amber-200'
-                      }`}
-                    >
-                      #{hr.rank}
+            {upcomingMeetings.length === 0 ? (
+              <div className="py-6 text-center text-xs text-[#60736C]">
+                No upcoming meetings scheduled.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {upcomingMeetings.slice(0, 3).map((m) => (
+                  <div
+                    key={m.id}
+                    className="rounded-2xl border border-[#E3EBE7] bg-[#F7F9F7] p-3 hover:bg-[#DDF7EF] transition"
+                  >
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="font-bold text-[#263832]">{m.title}</span>
+                      <span className="rounded-full bg-[#E7F3D7] px-2 py-0.2 text-[9px] font-bold text-[#064A31]">
+                        {m.mode}
+                      </span>
                     </div>
-                    <img
-                      src={hr.member.avatar}
-                      alt={hr.member.name}
-                      className="h-8 w-8 rounded-full object-cover"
-                    />
-                    <div>
-                      <div className="text-xs font-bold text-white">{hr.member.name}</div>
-                      <div className="text-[10px] text-slate-400 truncate max-w-[120px]">
-                        {hr.assignedDepartmentName}
-                      </div>
+                    <div className="mt-1 text-[11px] text-[#60736C]">
+                      {m.date} at {m.startTime} • {m.location}
                     </div>
+                    {m.meetingLink && (
+                      <a
+                        href={m.meetingLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-2 inline-flex items-center gap-1 rounded-xl bg-white border border-[#E3EBE7] px-2 py-0.5 text-[10px] font-bold text-[#064A31] hover:bg-[#2FC3A5] hover:text-white transition"
+                      >
+                        <Video className="h-3 w-3" />
+                        <span>Join Room</span>
+                      </a>
+                    )}
                   </div>
-
-                  <div className="text-right">
-                    <div className="text-sm font-extrabold text-amber-400 font-mono">
-                      {hr.compositeScore} pts
-                    </div>
-                    <div className="text-[10px] text-slate-400">
-                      {hr.verifiedTasksCount} verified tasks
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Announcements & Important Notices */}
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/80 p-5 shadow-lg">
+          {/* Announcements & Notices */}
+          <div className="rounded-3xl border border-[#E3EBE7] bg-white p-5 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <Megaphone className="h-5 w-5 text-amber-400" />
-                <h3 className="font-bold text-white text-sm">Announcements</h3>
+                <Megaphone className="h-4 w-4 text-[#2FC3A5]" />
+                <h3 className="font-bold text-[#263832] text-sm">Notice Board</h3>
               </div>
-              <Link href="/events" className="text-xs text-amber-400 hover:underline">
+              <Link href="/events" className="text-xs font-semibold text-[#2FC3A5] hover:underline">
                 View All
               </Link>
             </div>
@@ -401,24 +341,24 @@ export default function DashboardPage() {
               {sortedAnnouncements.slice(0, 3).map((ann) => (
                 <div
                   key={ann.id}
-                  className={`rounded-xl border p-3 ${
+                  className={`rounded-2xl border p-3 ${
                     ann.isPinned
-                      ? 'border-amber-500/40 bg-amber-500/5'
-                      : 'border-slate-800 bg-slate-800/40'
+                      ? 'border-[#2FC3A5]/40 bg-[#DDF7EF]/40'
+                      : 'border-[#E3EBE7] bg-[#F7F9F7]'
                   }`}
                 >
-                  <div className="flex items-center justify-between text-xs font-semibold">
-                    <span className="text-amber-400">{ann.title}</span>
+                  <div className="flex items-center justify-between text-xs font-bold">
+                    <span className="text-[#263832]">{ann.title}</span>
                     {ann.isPinned && (
-                      <span className="rounded bg-amber-400/20 px-1.5 py-0.5 text-[9px] font-bold text-amber-300 uppercase">
+                      <span className="rounded bg-[#FFC220]/20 px-1.5 py-0.2 text-[9px] font-black text-[#B45309] uppercase">
                         Pinned
                       </span>
                     )}
                   </div>
-                  <p className="mt-1 text-xs text-slate-300 line-clamp-2">
+                  <p className="mt-1 text-xs text-[#60736C] line-clamp-2">
                     {ann.content}
                   </p>
-                  <div className="mt-2 text-[10px] text-slate-400">
+                  <div className="mt-2 text-[10px] text-[#60736C]">
                     {new Date(ann.createdAt).toLocaleDateString()}
                   </div>
                 </div>

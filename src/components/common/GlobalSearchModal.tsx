@@ -11,7 +11,6 @@ import {
   Calendar,
   CheckSquare,
   Building2,
-  Megaphone,
 } from 'lucide-react';
 
 interface GlobalSearchModalProps {
@@ -21,7 +20,7 @@ interface GlobalSearchModalProps {
 
 export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
   const router = useRouter();
-  const { members, departments, meetings, moms, tasks, events, announcements } = useData();
+  const { members, departments, meetings, moms, tasks } = useData();
   const [query, setQuery] = useState('');
 
   // Keyboard shortcut listener: Ctrl+K or Cmd+K
@@ -30,9 +29,6 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
       if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
         e.preventDefault();
         if (isOpen) onClose();
-        else {
-          // Trigger open
-        }
       }
       if (e.key === 'Escape' && isOpen) {
         onClose();
@@ -104,30 +100,30 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
     filteredDepts.length;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/70 p-4 pt-16 backdrop-blur-sm sm:pt-24">
-      <div className="w-full max-w-2xl rounded-2xl border border-slate-700 bg-slate-900 shadow-2xl shadow-black overflow-hidden ring-1 ring-slate-800 animate-in fade-in zoom-in-95 duration-150">
+    <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 p-4 pt-16 backdrop-blur-sm sm:pt-24 animate-fadeIn">
+      <div className="w-full max-w-2xl rounded-3xl border border-[#E3EBE7] bg-white shadow-2xl overflow-hidden">
         {/* Search Input Bar */}
-        <div className="flex items-center border-b border-slate-800 px-4 py-3">
-          <Search className="h-5 w-5 text-amber-400" />
+        <div className="flex items-center border-b border-[#E3EBE7] px-4 py-3 bg-[#F7F9F7]">
+          <Search className="h-5 w-5 text-[#2FC3A5]" />
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search anything: 'Aarav', 'Diwali Expo', 'MOM', 'Attendance', 'Finance'..."
+            placeholder="Search anything: 'Aarav', 'Expo', 'MoM', 'Attendance', 'Finance'..."
             autoFocus
-            className="flex-1 bg-transparent px-3 text-sm text-white placeholder-slate-500 focus:outline-none"
+            className="flex-1 bg-transparent px-3 text-sm text-[#263832] placeholder-[#8a9e96] focus:outline-none"
           />
           {query && (
             <button
               onClick={() => setQuery('')}
-              className="p-1 text-slate-400 hover:text-white"
+              className="p-1 text-[#8a9e96] hover:text-[#263832]"
             >
               <X className="h-4 w-4" />
             </button>
           )}
           <button
             onClick={onClose}
-            className="ml-2 rounded-lg bg-slate-800 px-2 py-1 text-xs text-slate-400 hover:text-white"
+            className="ml-2 rounded-lg bg-white border border-[#E3EBE7] px-2 py-1 text-xs text-[#637d74] hover:text-[#263832]"
           >
             Esc
           </button>
@@ -137,16 +133,16 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
         <div className="max-h-[60vh] overflow-y-auto p-4 space-y-4">
           {!q ? (
             <div className="py-12 text-center">
-              <Search className="mx-auto h-8 w-8 text-slate-600 mb-2" />
-              <p className="text-sm font-medium text-slate-400">
+              <Search className="mx-auto h-8 w-8 text-[#8a9e96] mb-2" />
+              <p className="text-sm font-medium text-[#637d74]">
                 Type a name, role, department, or keyword to search across Enactus VIPS-TC records.
               </p>
               <div className="mt-4 flex flex-wrap justify-center gap-2">
-                {['President', 'Digital Operations', 'Diwali Expo', 'MOM', 'Secondary HR'].map((s) => (
+                {['President', 'Digital Operations', 'Attendance', 'MoM', 'Secondary HR'].map((s) => (
                   <button
                     key={s}
                     onClick={() => setQuery(s)}
-                    className="rounded-full border border-slate-800 bg-slate-800/60 px-3 py-1 text-xs text-slate-400 hover:border-amber-500/40 hover:text-amber-300"
+                    className="rounded-full border border-[#E3EBE7] bg-[#F7F9F7] px-3 py-1 text-xs text-[#637d74] hover:border-[#2FC3A5] hover:text-[#2FC3A5] transition"
                   >
                     {s}
                   </button>
@@ -154,7 +150,7 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
               </div>
             </div>
           ) : totalResults === 0 ? (
-            <div className="py-12 text-center text-sm text-slate-400">
+            <div className="py-12 text-center text-sm text-[#8a9e96]">
               No matching records found for "{query}".
             </div>
           ) : (
@@ -162,8 +158,8 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
               {/* Members */}
               {filteredMembers.length > 0 && (
                 <div>
-                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-400 mb-2">
-                    <Users className="h-3.5 w-3.5" />
+                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#0D5143] mb-2">
+                    <Users className="h-3.5 w-3.5 text-[#2FC3A5]" />
                     <span>Members ({filteredMembers.length})</span>
                   </div>
                   <div className="space-y-1">
@@ -171,22 +167,22 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
                       <div
                         key={m.id}
                         onClick={() => handleNavigate(`/members`)}
-                        className="flex cursor-pointer items-center justify-between rounded-xl p-2.5 hover:bg-slate-800 transition"
+                        className="flex cursor-pointer items-center justify-between rounded-xl p-2.5 hover:bg-[#F7F9F7] transition"
                       >
                         <div className="flex items-center gap-3">
                           <img
                             src={m.avatar}
                             alt={m.name}
-                            className="h-8 w-8 rounded-full object-cover"
+                            className="h-8 w-8 rounded-full object-cover border border-[#E3EBE7]"
                           />
                           <div>
-                            <div className="text-sm font-semibold text-white">{m.name}</div>
-                            <div className="text-xs text-slate-400">
+                            <div className="text-sm font-semibold text-[#263832]">{m.name}</div>
+                            <div className="text-xs text-[#637d74]">
                               {m.roleTitle} • {m.memberId}
                             </div>
                           </div>
                         </div>
-                        <span className="rounded bg-amber-400/10 px-2 py-0.5 text-[10px] font-semibold text-amber-300">
+                        <span className="rounded-full bg-[#E7F3D7] px-2.5 py-0.5 text-[10px] font-bold text-[#0D5143]">
                           {m.primaryDepartmentId}
                         </span>
                       </div>
@@ -198,8 +194,8 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
               {/* MOMs */}
               {filteredMOMs.length > 0 && (
                 <div>
-                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-400 mb-2">
-                    <FileText className="h-3.5 w-3.5" />
+                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#0D5143] mb-2">
+                    <FileText className="h-3.5 w-3.5 text-[#2FC3A5]" />
                     <span>Meeting Minutes ({filteredMOMs.length})</span>
                   </div>
                   <div className="space-y-1">
@@ -207,13 +203,13 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
                       <div
                         key={mom.id}
                         onClick={() => handleNavigate(`/moms`)}
-                        className="cursor-pointer rounded-xl p-2.5 hover:bg-slate-800 transition"
+                        className="cursor-pointer rounded-xl p-2.5 hover:bg-[#F7F9F7] transition"
                       >
-                        <div className="flex items-center justify-between text-sm font-medium text-white">
+                        <div className="flex items-center justify-between text-sm font-medium text-[#263832]">
                           <span>{mom.title}</span>
-                          <span className="text-xs text-slate-400">{mom.meetingDate}</span>
+                          <span className="text-xs text-[#8a9e96]">{mom.meetingDate}</span>
                         </div>
-                        <div className="text-xs text-slate-400 truncate mt-0.5">
+                        <div className="text-xs text-[#637d74] truncate mt-0.5">
                           {mom.agenda || 'Meeting Minutes record'}
                         </div>
                       </div>
@@ -225,8 +221,8 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
               {/* Meetings */}
               {filteredMeetings.length > 0 && (
                 <div>
-                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-400 mb-2">
-                    <Calendar className="h-3.5 w-3.5" />
+                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#0D5143] mb-2">
+                    <Calendar className="h-3.5 w-3.5 text-[#2FC3A5]" />
                     <span>Meetings & Calendar ({filteredMeetings.length})</span>
                   </div>
                   <div className="space-y-1">
@@ -234,13 +230,13 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
                       <div
                         key={meet.id}
                         onClick={() => handleNavigate(`/calendar`)}
-                        className="cursor-pointer rounded-xl p-2.5 hover:bg-slate-800 transition"
+                        className="cursor-pointer rounded-xl p-2.5 hover:bg-[#F7F9F7] transition"
                       >
-                        <div className="flex items-center justify-between text-sm font-medium text-white">
+                        <div className="flex items-center justify-between text-sm font-medium text-[#263832]">
                           <span>{meet.title}</span>
-                          <span className="text-xs text-amber-400 font-semibold">{meet.date} {meet.startTime}</span>
+                          <span className="text-xs text-[#2FC3A5] font-semibold">{meet.date} {meet.startTime}</span>
                         </div>
-                        <div className="text-xs text-slate-400 truncate mt-0.5">
+                        <div className="text-xs text-[#637d74] truncate mt-0.5">
                           {meet.mode} • {meet.location}
                         </div>
                       </div>
@@ -252,8 +248,8 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
               {/* Tasks */}
               {filteredTasks.length > 0 && (
                 <div>
-                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-400 mb-2">
-                    <CheckSquare className="h-3.5 w-3.5" />
+                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#0D5143] mb-2">
+                    <CheckSquare className="h-3.5 w-3.5 text-[#2FC3A5]" />
                     <span>Tasks ({filteredTasks.length})</span>
                   </div>
                   <div className="space-y-1">
@@ -261,15 +257,15 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
                       <div
                         key={t.id}
                         onClick={() => handleNavigate(`/tasks`)}
-                        className="cursor-pointer rounded-xl p-2.5 hover:bg-slate-800 transition"
+                        className="cursor-pointer rounded-xl p-2.5 hover:bg-[#F7F9F7] transition"
                       >
-                        <div className="flex items-center justify-between text-sm font-medium text-white">
+                        <div className="flex items-center justify-between text-sm font-medium text-[#263832]">
                           <span>{t.title}</span>
-                          <span className="rounded bg-slate-800 px-2 py-0.5 text-[10px] text-amber-300">
+                          <span className="rounded-full bg-[#E7F3D7] px-2 py-0.5 text-[10px] text-[#0D5143] font-bold">
                             {t.status}
                           </span>
                         </div>
-                        <div className="text-xs text-slate-400 mt-0.5">
+                        <div className="text-xs text-[#637d74] mt-0.5">
                           Category: {t.category} • Deadline: {t.deadline}
                         </div>
                       </div>
@@ -281,8 +277,8 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
               {/* Departments */}
               {filteredDepts.length > 0 && (
                 <div>
-                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-400 mb-2">
-                    <Building2 className="h-3.5 w-3.5" />
+                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#0D5143] mb-2">
+                    <Building2 className="h-3.5 w-3.5 text-[#2FC3A5]" />
                     <span>Departments ({filteredDepts.length})</span>
                   </div>
                   <div className="space-y-1">
@@ -290,10 +286,10 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
                       <div
                         key={d.id}
                         onClick={() => handleNavigate(`/departments`)}
-                        className="cursor-pointer rounded-xl p-2.5 hover:bg-slate-800 transition flex items-center justify-between"
+                        className="cursor-pointer rounded-xl p-2.5 hover:bg-[#F7F9F7] transition flex items-center justify-between"
                       >
-                        <span className="text-sm font-medium text-white">{d.name}</span>
-                        <span className="text-xs text-slate-400 truncate max-w-xs">{d.description}</span>
+                        <span className="text-sm font-medium text-[#263832]">{d.name}</span>
+                        <span className="text-xs text-[#637d74] truncate max-w-xs">{d.description}</span>
                       </div>
                     ))}
                   </div>

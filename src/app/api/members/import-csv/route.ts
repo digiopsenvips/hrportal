@@ -92,6 +92,9 @@ export async function POST(req: NextRequest) {
         role,
         roleTitle: cols[roleIdx] || 'Member',
         status: 'Active',
+        approvalStatus: 'APPROVED',
+        membershipStatus: 'ACTIVE',
+        authProvider: 'email',
         createdAt: new Date().toISOString(),
       };
 

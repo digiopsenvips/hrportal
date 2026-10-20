@@ -3,35 +3,34 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 255, 255, 255;
-  --background-start-rgb: 15, 23, 42;
-  --background-end-rgb: 10, 15, 28;
+  --foreground: #263832;
+  --background: #F7F9F7;
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 75%, #080d1a 100%);
+  color: #263832;
+  background-color: #F7F9F7;
   min-height: 100vh;
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
 }
 
-/* Custom Scrollbars */
+/* TeamHub Crisp Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: rgba(15, 23, 42, 0.6);
+  background: #F7F9F7;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(100, 116, 139, 0.5);
+  background: #B1C8C4;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(251, 191, 36, 0.8);
+  background: #2FC3A5;
 }
 
-/* Print Styles for MOMs and Attendance Sheets */
+/* Print Styles for MoMs and Attendance Sheets */
 @media print {
   body {
     background: white !important;

@@ -10,13 +10,21 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        teamhub: {
+          bg: "#F7F9F7",
+          card: "#FFFFFF",
+          primary: "#2FC3A5",
+          primaryHover: "#26B396",
+          highlight: "#E7F3D7",
+          hover: "#DDF7EF",
+          border: "#E3EBE7",
+          text: "#263832",
+          muted: "#60736C",
+          teal: "#0D5143",
+        },
         enactus: {
-          yellow: "#FFC220",
-          yellowHover: "#E6AB10",
-          dark: "#121826",
-          navy: "#0F172A",
-          accent: "#2563EB",
-          card: "#1E293B",
+          gold: "#FFC220",
+          goldHover: "#E6AB10",
         },
       },
     },

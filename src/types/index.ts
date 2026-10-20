@@ -9,6 +9,9 @@ export type RoleType =
   | 'secondary_hr'
   | 'general_member';
 
+export type ApprovalStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
+export type MembershipStatus = 'ACTIVE' | 'SUSPENDED' | 'TERMINATED';
+
 export interface Department {
   id: string;
   name: string;
@@ -27,6 +30,11 @@ export interface Member {
   name: string;
   email: string;
   passwordHash?: string;
+  authProvider?: 'email' | 'google';
+  approvalStatus: ApprovalStatus;
+  membershipStatus: MembershipStatus;
+  statusChangeReason?: string;
+  statusChangedAt?: string;
   avatar: string;
   collegeEnrollment: string;
   jeeRank?: number | null;
@@ -37,10 +45,10 @@ export interface Member {
   primaryDepartmentId: string;
   additionalDepartmentId?: string | null;
   role: RoleType;
-  roleTitle: string; // e.g. "President", "Vice President - Operations", "Head of Digital Operations"
-  assignedDepartmentId?: string | null; // For Secondary HR or Dept Head
-  assignedSecondaryHrId?: string | null; // For Members
-  status: 'Active' | 'Inactive' | 'Alumni' | 'On Leave';
+  roleTitle: string;
+  assignedDepartmentId?: string | null;
+  assignedSecondaryHrId?: string | null;
+  status: 'Active' | 'Inactive' | 'Alumni' | 'On Leave'; // Existing UI status
   phone?: string;
   bio?: string;
   createdAt: string;
@@ -52,10 +60,10 @@ export type MeetingStatus = 'Scheduled' | 'Completed' | 'Cancelled' | 'Reschedul
 export interface Meeting {
   id: string;
   title: string;
-  departmentId: string; // 'ALL' or department ID
-  date: string; // YYYY-MM-DD
-  startTime: string; // HH:MM
-  endTime: string; // HH:MM
+  departmentId: string;
+  date: string;
+  startTime: string;
+  endTime: string;
   mode: MeetingMode;
   location: string;
   agenda: string;
@@ -184,7 +192,7 @@ export interface Task {
   actualEffortHours: number;
   completionEvidence?: string;
   reviewerId?: string;
-  reviewerScore?: number; // 1 to 10
+  reviewerScore?: number;
   isVerified: boolean;
   momId?: string;
   createdAt: string;
@@ -218,7 +226,7 @@ export interface Announcement {
   title: string;
   content: string;
   authorId: string;
-  departmentId: string; // 'ALL' or specific department
+  departmentId: string;
   isPinned: boolean;
   priority: 'Normal' | 'Urgent';
   createdAt: string;
@@ -236,12 +244,12 @@ export interface InAppNotification {
 }
 
 export interface LeaderboardWeights {
-  verifiedCompletion: number; // e.g. 25
-  onTimeCompletion: number; // e.g. 20
-  momQuality: number; // e.g. 20
-  attendanceAccuracy: number; // e.g. 15
-  meetingEventCoordination: number; // e.g. 10
-  reviewerScore: number; // e.g. 10
+  verifiedCompletion: number;
+  onTimeCompletion: number;
+  momQuality: number;
+  attendanceAccuracy: number;
+  meetingEventCoordination: number;
+  reviewerScore: number;
 }
 
 export interface AttendanceFormulaSettings {
@@ -271,14 +279,14 @@ export interface HRLeaderboardEntry {
   assignedDepartmentName: string;
   verifiedTasksCount: number;
   totalAssignedTasks: number;
-  taskCompletionRate: number; // %
-  onTimeCompletionRate: number; // %
+  taskCompletionRate: number;
+  onTimeCompletionRate: number;
   momsPreparedCount: number;
   attendanceSheetsCompleted: number;
   meetingsCoordinated: number;
   eventsSupported: number;
-  averageReviewerScore: number; // out of 10
+  averageReviewerScore: number;
   loggedHours: number;
-  compositeScore: number; // 0 to 100
+  compositeScore: number;
   rank: number;
 }

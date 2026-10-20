@@ -1,7 +1,8 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Member, RoleType } from '@/types';
+import { useRouter, usePathname } from 'next/navigation';
+import { Member } from '@/types';
 import { getPermissions, UserPermissions } from '@/lib/permissions';
 
 interface AuthContextType {
@@ -9,6 +10,7 @@ interface AuthContextType {
   permissions: UserPermissions;
   isLoading: boolean;
   login: (email: string, password?: string) => Promise<{ success: boolean; message?: string }>;
+  register: (payload: any) => Promise<{ success: boolean; message?: string }>;
   logout: () => void;
   switchRoleMember: (memberId: string) => void;
   updateCurrentUserProfile: (updatedData: Partial<Member>) => Promise<boolean>;
@@ -19,6 +21,8 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+  const pathname = usePathname();
   const [currentUser, setCurrentUser] = useState<Member | null>(null);
   const [allMembers, setAllMembers] = useState<Member[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -45,56 +49,88 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (savedMemberId) {
         const found = members.find((m) => m.id === savedMemberId);
         if (found) {
-          setCurrentUser(found);
-          setIsLoading(false);
-          return;
+          // Check approval and membership status
+          if (found.approvalStatus === 'PENDING') {
+            setCurrentUser(found);
+            setIsLoading(false);
+            if (pathname !== '/pending-approval') router.push('/pending-approval');
+            return;
+          }
+          if (found.membershipStatus === 'ACTIVE') {
+            setCurrentUser(found);
+            setIsLoading(false);
+            return;
+          }
         }
       }
 
-      // Default to President so the user immediately experiences the full system capabilities
-      if (members.length > 0) {
-        const defaultUser = members.find((m) => m.role === 'president') || members[0];
-        setCurrentUser(defaultUser);
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('enactus_user_id', defaultUser.id);
-        }
-      }
+      // No valid active session
+      setCurrentUser(null);
       setIsLoading(false);
+
+      const publicPaths = ['/login', '/register', '/pending-approval'];
+      if (!publicPaths.includes(pathname)) {
+        router.push('/login');
+      }
     };
 
     initAuth();
-  }, []);
+  }, [pathname, router]);
 
   const login = async (email: string, password?: string) => {
     try {
-      const res = await fetch('/api/members');
-      if (!res.ok) return { success: false, message: 'Failed to connect to authentication server' };
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
 
-      const members: Member[] = await res.json();
-      const user = members.find(
-        (m) => m.email.toLowerCase() === email.toLowerCase() || m.memberId.toLowerCase() === email.toLowerCase()
-      );
+      const data = await res.json();
 
-      if (!user) {
-        return { success: false, message: 'No registered member found with this email or Member ID' };
+      if (!res.ok) {
+        if (data.error === 'APPROVAL_PENDING') {
+          localStorage.setItem('enactus_user_id', data.user.id);
+          router.push('/pending-approval');
+          return { success: false, message: data.message };
+        }
+        return { success: false, message: data.error || 'Authentication failed' };
       }
 
-      setCurrentUser(user);
-      localStorage.setItem('enactus_user_id', user.id);
+      setCurrentUser(data.user);
+      localStorage.setItem('enactus_user_id', data.user.id);
+      await fetchMembers();
+      router.push('/dashboard');
       return { success: true };
     } catch (err: any) {
       return { success: false, message: err.message || 'Login error' };
     }
   };
 
+  const register = async (payload: any) => {
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        return { success: false, message: data.error || 'Registration failed' };
+      }
+
+      localStorage.setItem('enactus_user_id', data.user.id);
+      router.push('/pending-approval');
+      return { success: true, message: data.message };
+    } catch (err: any) {
+      return { success: false, message: err.message || 'Registration error' };
+    }
+  };
+
   const logout = () => {
     localStorage.removeItem('enactus_user_id');
-    // Set to general member on logout or null
-    const general = allMembers.find((m) => m.role === 'general_member') || null;
-    setCurrentUser(general);
-    if (general) {
-      localStorage.setItem('enactus_user_id', general.id);
-    }
+    setCurrentUser(null);
+    router.push('/login');
   };
 
   const switchRoleMember = (memberId: string) => {
@@ -143,6 +179,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         permissions,
         isLoading,
         login,
+        register,
         logout,
         switchRoleMember,
         updateCurrentUserProfile,
