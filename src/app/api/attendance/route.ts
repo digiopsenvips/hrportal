@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { getDatabase, saveDatabase } from '@/lib/storage';
+import { getDatabase, saveDatabase, appendAuditLog } from '@/lib/storage';
 import { jsonResponse, errorResponse } from '@/lib/api-response';
 import { AttendanceRecord, AttendanceStatus } from '@/types';
 
@@ -61,12 +61,28 @@ export async function POST(req: NextRequest) {
             markedById,
             markedAt: new Date().toISOString(),
             notes: item.notes || '',
+            durationMinutes: item.durationMinutes,
+            recordingSource: item.recordingSource || 'manual',
+            joinTime: item.joinTime,
+            leaveTime: item.leaveTime,
             auditTrail: [],
           };
           db.attendance.push(newRecord);
           createdOrUpdated.push(newRecord);
         }
       }
+
+      const marker = db.members.find((m) => m.id === markedById);
+      appendAuditLog({
+        userId: markedById,
+        userName: marker ? marker.name : 'HR Representative',
+        userRole: marker ? marker.role : 'secondary_hr',
+        departmentId: departmentId || '',
+        action: 'ATTENDANCE_BULK_MARK',
+        recordType: 'ATTENDANCE',
+        recordId: meetingId,
+        details: `Recorded attendance for ${createdOrUpdated.length} member(s) in meeting ${meetingId}.`,
+      });
 
       saveDatabase(db);
       return jsonResponse({ success: true, count: createdOrUpdated.length, records: createdOrUpdated });

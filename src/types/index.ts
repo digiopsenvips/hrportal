@@ -7,7 +7,8 @@ export type RoleType =
   | 'hr_head'
   | 'dept_head'
   | 'secondary_hr'
-  | 'general_member';
+  | 'general_member'
+  | 'developer';
 
 export type ApprovalStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 export type MembershipStatus = 'ACTIVE' | 'SUSPENDED' | 'TERMINATED';
@@ -78,6 +79,21 @@ export interface Meeting {
 
 export type MOMStatus = 'Draft' | 'Pending Review' | 'Published' | 'Confidential';
 
+export interface MOMEditRequest {
+  id: string;
+  momId: string;
+  requestedById: string;
+  requestedByName: string;
+  requestedAt: string;
+  reason: string;
+  proposedChanges: string;
+  status: 'Pending' | 'Approved' | 'Rejected';
+  reviewedById?: string;
+  reviewedByName?: string;
+  reviewedAt?: string;
+  reviewerComment?: string;
+}
+
 export interface MOMDiscussionPoint {
   id: string;
   topic: string;
@@ -95,6 +111,7 @@ export interface MOMActionItem {
   assigneeId: string;
   deadline: string;
   taskId?: string;
+  status?: 'Not Started' | 'In Progress' | 'Blocked' | 'Completed';
 }
 
 export interface MOMRevision {
@@ -123,6 +140,9 @@ export interface MOM {
   preparedById: string;
   reviewedById?: string;
   publicationStatus: MOMStatus;
+  isEditedAfterPublishing?: boolean;
+  unlockedUntil?: string;
+  editRequests?: MOMEditRequest[];
   revisionHistory: MOMRevision[];
   createdAt: string;
   updatedAt: string;
@@ -146,8 +166,29 @@ export interface AttendanceRecord {
   status: AttendanceStatus;
   markedById: string;
   markedAt: string;
+  joinTime?: string;
+  leaveTime?: string;
+  durationMinutes?: number;
+  recordingSource?: 'platform' | 'csv' | 'manual';
   notes?: string;
   auditTrail: AttendanceAuditLog[];
+}
+
+export interface AuditLogEntry {
+  id: string;
+  correlationId?: string;
+  userId: string;
+  userName: string;
+  userRole: string;
+  departmentId?: string;
+  action: string;
+  recordType: 'MOM' | 'ATTENDANCE' | 'MEETING' | 'TASK' | 'MEMBER' | 'EXPORT' | 'AUTH' | 'SETTINGS';
+  recordId?: string;
+  timestamp: string;
+  changedFields?: Record<string, { before: any; after: any }>;
+  reason?: string;
+  ipAddress?: string;
+  details?: string;
 }
 
 export interface AttendanceCorrectionRequest {

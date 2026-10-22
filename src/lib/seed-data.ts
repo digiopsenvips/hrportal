@@ -357,6 +357,31 @@ export const INITIAL_MEMBERS: Member[] = [
     bio: 'Applied for web and digital automation track.',
     createdAt: '2026-10-21T01:00:00.000Z',
   },
+  // 11. Lead Developer (Audit & System Maintenance)
+  {
+    id: 'mem-999',
+    memberId: 'ENVIPS-2022-999',
+    name: 'Devansh Verma',
+    email: 'developer@enactusvips.org',
+    passwordHash: DEFAULT_DEMO_HASH,
+    authProvider: 'email',
+    approvalStatus: 'APPROVED',
+    membershipStatus: 'ACTIVE',
+    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+    collegeEnrollment: '04517702001',
+    jeeRank: 8400,
+    currentSemester: 7,
+    academicYear: '4th Year',
+    branch: 'Computer Science & Engineering',
+    yearOfJoining: 2022,
+    primaryDepartmentId: 'digital-operations',
+    role: 'developer',
+    roleTitle: 'Lead System Developer',
+    status: 'Active',
+    phone: '+91 98990 00112',
+    bio: 'Full-stack architect & developer maintaining society portals and audit security logs.',
+    createdAt: '2022-08-01T10:00:00.000Z',
+  },
 ];
 
 export const INITIAL_MEETINGS: Meeting[] = [

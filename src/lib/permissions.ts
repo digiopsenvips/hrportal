@@ -8,6 +8,7 @@ export interface UserPermissions {
   isDeptHead: boolean;
   isSecondaryHR: boolean;
   isGeneralMember: boolean;
+  isDeveloper: boolean;
 
   canManageAllDepartments: boolean;
   canManageAssignedDepartment: boolean;
@@ -17,6 +18,8 @@ export interface UserPermissions {
   canCreateMOM: boolean;
   canReviewMOM: boolean;
   canPublishMOM: boolean;
+  canRequestMOMEdit: boolean;
+  canApproveMOMEdits: boolean;
   canViewConfidentialMOMs: boolean;
   canMarkAttendance: boolean;
   canEditAttendance: boolean;
@@ -27,6 +30,8 @@ export interface UserPermissions {
   canConfigureSocietySettings: boolean;
   canPostAnnouncements: boolean;
   canScheduleMeetings: boolean;
+  canAccessAuditLogs: boolean;
+  canAccessAllAuditLogs: boolean;
 }
 
 export function getPermissions(member: Member | null): UserPermissions {
@@ -39,6 +44,7 @@ export function getPermissions(member: Member | null): UserPermissions {
       isDeptHead: false,
       isSecondaryHR: false,
       isGeneralMember: true,
+      isDeveloper: false,
       canManageAllDepartments: false,
       canManageAssignedDepartment: false,
       canManageHRTeam: false,
@@ -47,6 +53,8 @@ export function getPermissions(member: Member | null): UserPermissions {
       canCreateMOM: false,
       canReviewMOM: false,
       canPublishMOM: false,
+      canRequestMOMEdit: false,
+      canApproveMOMEdits: false,
       canViewConfidentialMOMs: false,
       canMarkAttendance: false,
       canEditAttendance: false,
@@ -57,6 +65,8 @@ export function getPermissions(member: Member | null): UserPermissions {
       canConfigureSocietySettings: false,
       canPostAnnouncements: false,
       canScheduleMeetings: false,
+      canAccessAuditLogs: false,
+      canAccessAllAuditLogs: false,
     };
   }
 
@@ -67,6 +77,7 @@ export function getPermissions(member: Member | null): UserPermissions {
   const isHRHead = role === 'hr_head';
   const isDeptHead = role === 'dept_head';
   const isSecondaryHR = role === 'secondary_hr';
+  const isDeveloper = role === 'developer';
   const isGeneralMember = role === 'general_member';
 
   const isCoreLeadership = isPresident || isVP || isSecretary;
@@ -80,15 +91,18 @@ export function getPermissions(member: Member | null): UserPermissions {
     isDeptHead,
     isSecondaryHR,
     isGeneralMember,
+    isDeveloper,
 
-    canManageAllDepartments: isPresident || isVP,
+    canManageAllDepartments: isPresident || isVP || isDeveloper,
     canManageAssignedDepartment: isPresident || isVP || isDeptHead || isSecondaryHR,
     canManageHRTeam: isHRLeadership,
     canManageMembers: isPresident || isHRHead || isSecretary,
-    canViewSensitiveMemberData: isPresident || isHRHead || isSecretary,
+    canViewSensitiveMemberData: isPresident || isHRHead || isSecretary || isDeveloper,
     canCreateMOM: isPresident || isSecretary || isHRHead || isDeptHead || isSecondaryHR,
     canReviewMOM: isPresident || isVP || isSecretary || isHRHead || isDeptHead,
     canPublishMOM: isPresident || isSecretary || isHRHead || isDeptHead,
+    canRequestMOMEdit: isHRHead || isSecondaryHR || isPresident,
+    canApproveMOMEdits: isDeptHead || isPresident,
     canViewConfidentialMOMs: isPresident || isVP || isSecretary || isHRHead,
     canMarkAttendance: isPresident || isHRHead || isDeptHead || isSecondaryHR || isSecretary,
     canEditAttendance: isPresident || isHRHead || isDeptHead || isSecondaryHR,
@@ -96,9 +110,11 @@ export function getPermissions(member: Member | null): UserPermissions {
     canManageTasks: isPresident || isVP || isSecretary || isHRHead || isDeptHead || isSecondaryHR,
     canVerifyTasks: isPresident || isHRHead || isDeptHead || isSecretary,
     canAccessHRLeaderboard: true, // Transparent society-wide viewing
-    canConfigureSocietySettings: isPresident || isHRHead,
+    canConfigureSocietySettings: isPresident || isHRHead || isDeveloper,
     canPostAnnouncements: isPresident || isVP || isSecretary || isHRHead || isDeptHead,
     canScheduleMeetings: isPresident || isVP || isSecretary || isHRHead || isDeptHead || isSecondaryHR,
+    canAccessAuditLogs: isDeveloper || isDeptHead || isPresident,
+    canAccessAllAuditLogs: isDeveloper || isPresident,
   };
 }
 

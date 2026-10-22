@@ -20,6 +20,7 @@ import {
   ChevronLeft,
   ChevronRight,
   UserPlus,
+  ShieldCheck,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -61,9 +62,10 @@ export function Sidebar({
       icon: Network,
     },
     {
-      label: 'Minutes of Meeting (MoM)',
+      label: 'MoM & Attendance',
       href: '/moms',
       icon: FileText,
+      badge: 'Integrated',
     },
     {
       label: 'Meetings & Calendar',
@@ -71,17 +73,12 @@ export function Sidebar({
       icon: Calendar,
     },
     {
-      label: 'Attendance & Quorum',
-      href: '/attendance',
-      icon: ClipboardCheck,
-    },
-    {
       label: 'Task Management',
       href: '/tasks',
       icon: CheckSquare,
     },
     {
-      label: 'HR Leaderboard',
+      label: 'Society Leaderboard',
       href: '/leaderboard',
       icon: Trophy,
     },
@@ -89,6 +86,12 @@ export function Sidebar({
       label: 'Departments (8 Hubs)',
       href: '/departments',
       icon: Building2,
+    },
+    {
+      label: 'Audit Log',
+      href: '/audit',
+      icon: ShieldCheck,
+      permission: permissions.canAccessAuditLogs,
     },
     {
       label: 'Notices & Events',

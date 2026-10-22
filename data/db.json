@@ -75,7 +75,7 @@
       "passwordHash": "f03ea21afe442a64dc8fe2b32f2bdbba2213607f1c327e1bcf5ae5c7933f9c763dfa3af96543cf0122fe0236bd60879dcbda406cb8614dc150eccd56361a88f1",
       "authProvider": "email",
       "approvalStatus": "APPROVED",
-      "membershipStatus": "ACTIVE",
+      "membershipStatus": "SUSPENDED",
       "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
       "collegeEnrollment": "04517702022",
       "jeeRank": 12450,
@@ -89,7 +89,9 @@
       "status": "Active",
       "phone": "+91 98110 12345",
       "bio": "Passionate about social entrepreneurship and scalable impact. Leading Enactus VIPS-TC to national excellence.",
-      "createdAt": "2022-08-10T10:00:00.000Z"
+      "createdAt": "2022-08-10T10:00:00.000Z",
+      "statusChangeReason": "werwer",
+      "statusChangedAt": "2026-10-21T16:41:07.247Z"
     },
     {
       "id": "mem-006",
@@ -146,7 +148,7 @@
       "passwordHash": "f03ea21afe442a64dc8fe2b32f2bdbba2213607f1c327e1bcf5ae5c7933f9c763dfa3af96543cf0122fe0236bd60879dcbda406cb8614dc150eccd56361a88f1",
       "authProvider": "email",
       "approvalStatus": "APPROVED",
-      "membershipStatus": "ACTIVE",
+      "membershipStatus": "TERMINATED",
       "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
       "collegeEnrollment": "04517702024",
       "jeeRank": 16200,
@@ -159,7 +161,9 @@
       "roleTitle": "Vice President (External Affairs & PR)",
       "status": "Active",
       "phone": "+91 98110 67890",
-      "createdAt": "2022-08-12T10:00:00.000Z"
+      "createdAt": "2022-08-12T10:00:00.000Z",
+      "statusChangeReason": "efwefewf",
+      "statusChangedAt": "2026-10-21T16:41:17.487Z"
     },
     {
       "id": "mem-004",
@@ -239,7 +243,7 @@
       "passwordHash": "f03ea21afe442a64dc8fe2b32f2bdbba2213607f1c327e1bcf5ae5c7933f9c763dfa3af96543cf0122fe0236bd60879dcbda406cb8614dc150eccd56361a88f1",
       "authProvider": "email",
       "approvalStatus": "APPROVED",
-      "membershipStatus": "ACTIVE",
+      "membershipStatus": "SUSPENDED",
       "avatar": "https://images.unsplash.com/photo-1544717305-2782549b5136?w=150&auto=format&fit=crop&q=80",
       "collegeEnrollment": "04517702075",
       "jeeRank": 24500,
@@ -253,7 +257,9 @@
       "roleTitle": "Secondary HR - Digital Operations",
       "status": "Active",
       "phone": "+91 97111 12345",
-      "createdAt": "2024-08-20T10:00:00.000Z"
+      "createdAt": "2024-08-20T10:00:00.000Z",
+      "statusChangeReason": "4rrf",
+      "statusChangedAt": "2026-10-21T16:24:56.827Z"
     },
     {
       "id": "mem-020",
@@ -287,7 +293,7 @@
       "email": "pending.applicant@enactusvips.org",
       "passwordHash": "f03ea21afe442a64dc8fe2b32f2bdbba2213607f1c327e1bcf5ae5c7933f9c763dfa3af96543cf0122fe0236bd60879dcbda406cb8614dc150eccd56361a88f1",
       "authProvider": "email",
-      "approvalStatus": "PENDING",
+      "approvalStatus": "APPROVED",
       "membershipStatus": "ACTIVE",
       "avatar": "https://api.dicebear.com/7.x/initials/svg?seed=Vikramaditya",
       "collegeEnrollment": "04517702099",
@@ -298,11 +304,13 @@
       "yearOfJoining": 2026,
       "primaryDepartmentId": "digital-operations",
       "role": "general_member",
-      "roleTitle": "Applicant (Pending Approval)",
+      "roleTitle": "Active Member",
       "status": "Active",
       "phone": "+91 99990 88776",
       "bio": "Applied for web and digital automation track.",
-      "createdAt": "2026-10-21T01:00:00.000Z"
+      "createdAt": "2026-10-21T01:00:00.000Z",
+      "statusChangeReason": "APPROVE by Devansh Mehra",
+      "statusChangedAt": "2026-10-21T16:24:48.699Z"
     },
     {
       "id": "mem-1792533324830",
@@ -327,6 +335,28 @@
       "createdAt": "2026-10-20T21:55:24.831Z",
       "statusChangeReason": "Returned from exam leave",
       "statusChangedAt": "2026-10-20T21:55:32.892Z"
+    },
+    {
+      "id": "mem-dev-01",
+      "memberId": "ENVIPS-2022-DEV",
+      "name": "Devansh Verma (Developer)",
+      "email": "developer@enactusvips.org",
+      "passwordHash": "8b7d94943fcf3cbfa1198642ca001ba02cb11bca0c0b396a98ab2db8cfb04c8651a34a3cc5951a8fec933c0d754b2b2b1ff1aa2ca33246ebec8bf697ec89d661:c4cb47631168ef9ad4a29a562ef6de2a",
+      "authProvider": "email",
+      "approvalStatus": "APPROVED",
+      "membershipStatus": "ACTIVE",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150",
+      "collegeEnrollment": "04517702001",
+      "currentSemester": 7,
+      "academicYear": "4th Year",
+      "branch": "Computer Science & Engineering",
+      "yearOfJoining": 2022,
+      "primaryDepartmentId": "digital-operations",
+      "role": "developer",
+      "roleTitle": "Lead System Developer",
+      "status": "Active",
+      "phone": "+91 98990 00112",
+      "createdAt": "2022-08-01T10:00:00.000Z"
     }
   ],
   "meetings": [
@@ -397,6 +427,33 @@
       "status": "Completed",
       "hasMom": true,
       "createdAt": "2026-10-14T09:00:00.000Z"
+    },
+    {
+      "id": "meet-1792600675285",
+      "title": "abc",
+      "departmentId": "ALL",
+      "date": "2026-10-27",
+      "startTime": "16:00",
+      "endTime": "17:30",
+      "mode": "Online",
+      "location": "Google Meet",
+      "meetingLink": "https://meet.google.com/enactus-sync",
+      "agenda": "",
+      "objectives": "Coordinate society milestones and strategic deliverables",
+      "organizerId": "mem-001",
+      "attendeeMemberIds": [
+        "mem-001",
+        "mem-006",
+        "mem-002",
+        "mem-003",
+        "mem-004",
+        "mem-005",
+        "mem-007",
+        "mem-014"
+      ],
+      "status": "Scheduled",
+      "hasMom": false,
+      "createdAt": "2026-10-21T16:37:55.285Z"
     }
   ],
   "moms": [
@@ -467,6 +524,40 @@
       "revisionHistory": [],
       "createdAt": "2026-10-19T17:00:00.000Z",
       "updatedAt": "2026-10-19T18:15:00.000Z"
+    },
+    {
+      "id": "mom-1792600990622",
+      "meetingId": "meeting-1792600990200",
+      "departmentId": "digital-operations",
+      "title": "t35t34",
+      "meetingDate": "2026-10-21",
+      "startTime": "15:00",
+      "endTime": "16:30",
+      "meetingType": "Online",
+      "location": "Google Meet",
+      "agenda": "",
+      "objectives": "",
+      "attendeeIds": [],
+      "absenteeIds": [],
+      "discussionPoints": [
+        {
+          "topic": "Operational Updates",
+          "notes": ""
+        }
+      ],
+      "decisionsMade": [],
+      "actionItems": [],
+      "preparedById": "mem-006",
+      "publicationStatus": "Pending Review",
+      "revisionHistory": [
+        {
+          "timestamp": "2026-10-21T16:43:10.622Z",
+          "editorId": "mem-006",
+          "note": "MOM drafted."
+        }
+      ],
+      "createdAt": "2026-10-21T16:43:10.622Z",
+      "updatedAt": "2026-10-21T16:43:10.622Z"
     }
   ],
   "attendance": [
@@ -475,10 +566,33 @@
       "meetingId": "meet-002",
       "departmentId": "digital-operations",
       "memberId": "mem-007",
-      "status": "Present",
+      "status": "Absent",
       "markedById": "mem-014",
       "markedAt": "2026-10-19T15:05:00.000Z",
-      "auditTrail": []
+      "auditTrail": [
+        {
+          "timestamp": "2026-10-20T21:58:55.943Z",
+          "changedById": "mem-001",
+          "previousStatus": "Present",
+          "newStatus": "Absent",
+          "reason": "Updated via attendance sheet"
+        },
+        {
+          "timestamp": "2026-10-20T21:59:06.165Z",
+          "changedById": "mem-001",
+          "previousStatus": "Absent",
+          "newStatus": "Present",
+          "reason": "Bulk attendance update"
+        },
+        {
+          "timestamp": "2026-10-20T21:59:18.587Z",
+          "changedById": "mem-001",
+          "previousStatus": "Present",
+          "newStatus": "Absent",
+          "reason": "Updated via attendance sheet"
+        }
+      ],
+      "notes": "Bulk marked Present"
     },
     {
       "id": "att-002",
@@ -488,7 +602,23 @@
       "status": "Present",
       "markedById": "mem-014",
       "markedAt": "2026-10-19T15:05:00.000Z",
-      "auditTrail": []
+      "auditTrail": [
+        {
+          "timestamp": "2026-10-20T21:58:57.060Z",
+          "changedById": "mem-001",
+          "previousStatus": "Present",
+          "newStatus": "Absent",
+          "reason": "Updated via attendance sheet"
+        },
+        {
+          "timestamp": "2026-10-20T21:59:06.165Z",
+          "changedById": "mem-001",
+          "previousStatus": "Absent",
+          "newStatus": "Present",
+          "reason": "Bulk attendance update"
+        }
+      ],
+      "notes": "Bulk marked Present"
     },
     {
       "id": "att-003",
@@ -498,10 +628,232 @@
       "status": "Present",
       "markedById": "mem-014",
       "markedAt": "2026-10-19T15:05:00.000Z",
+      "auditTrail": [
+        {
+          "timestamp": "2026-10-20T21:58:57.934Z",
+          "changedById": "mem-001",
+          "previousStatus": "Present",
+          "newStatus": "Present",
+          "reason": "Updated via attendance sheet"
+        },
+        {
+          "timestamp": "2026-10-20T21:59:06.165Z",
+          "changedById": "mem-001",
+          "previousStatus": "Present",
+          "newStatus": "Present",
+          "reason": "Bulk attendance update"
+        }
+      ],
+      "notes": "Bulk marked Present"
+    },
+    {
+      "id": "att-1792533533335",
+      "meetingId": "meet-002",
+      "departmentId": "digital-operations",
+      "memberId": "mem-001",
+      "status": "Present",
+      "markedById": "mem-001",
+      "markedAt": "2026-10-20T21:58:53.335Z",
+      "notes": "Bulk marked Present",
+      "auditTrail": [
+        {
+          "timestamp": "2026-10-20T21:59:06.165Z",
+          "changedById": "mem-001",
+          "previousStatus": "Present",
+          "newStatus": "Present",
+          "reason": "Bulk attendance update"
+        }
+      ]
+    },
+    {
+      "id": "att-1792533534554",
+      "meetingId": "meet-002",
+      "departmentId": "digital-operations",
+      "memberId": "mem-005",
+      "status": "Excused",
+      "markedById": "mem-001",
+      "markedAt": "2026-10-20T21:58:54.554Z",
+      "notes": "Bulk marked Present",
+      "auditTrail": [
+        {
+          "timestamp": "2026-10-20T21:59:06.165Z",
+          "changedById": "mem-001",
+          "previousStatus": "Late",
+          "newStatus": "Present",
+          "reason": "Bulk attendance update"
+        },
+        {
+          "timestamp": "2026-10-20T21:59:17.816Z",
+          "changedById": "mem-001",
+          "previousStatus": "Present",
+          "newStatus": "Absent",
+          "reason": "Updated via attendance sheet"
+        },
+        {
+          "timestamp": "2026-10-21T16:45:56.201Z",
+          "changedById": "mem-006",
+          "previousStatus": "Absent",
+          "newStatus": "Excused",
+          "reason": "Approved attendance correction request: yoyoyo"
+        }
+      ]
+    },
+    {
+      "id": "att-1792533538973",
+      "meetingId": "meet-002",
+      "departmentId": "digital-operations",
+      "memberId": "mem-999",
+      "status": "Present",
+      "markedById": "mem-001",
+      "markedAt": "2026-10-20T21:58:58.973Z",
+      "notes": "Bulk marked Present",
+      "auditTrail": [
+        {
+          "timestamp": "2026-10-20T21:59:06.165Z",
+          "changedById": "mem-001",
+          "previousStatus": "Present",
+          "newStatus": "Present",
+          "reason": "Bulk attendance update"
+        }
+      ]
+    },
+    {
+      "id": "att-1792533542664",
+      "meetingId": "meet-002",
+      "departmentId": "digital-operations",
+      "memberId": "mem-1792533324830",
+      "status": "Present",
+      "markedById": "mem-001",
+      "markedAt": "2026-10-20T21:59:02.664Z",
+      "notes": "Bulk marked Present",
+      "auditTrail": [
+        {
+          "timestamp": "2026-10-20T21:59:06.165Z",
+          "changedById": "mem-001",
+          "previousStatus": "Present",
+          "newStatus": "Present",
+          "reason": "Bulk attendance update"
+        }
+      ]
+    },
+    {
+      "id": "att-1792600059460",
+      "meetingId": "meet-001",
+      "departmentId": "ALL",
+      "memberId": "mem-006",
+      "status": "Present",
+      "markedById": "mem-005",
+      "markedAt": "2026-10-21T16:27:39.460Z",
+      "notes": "",
+      "auditTrail": [
+        {
+          "timestamp": "2026-10-21T16:45:39.690Z",
+          "changedById": "mem-006",
+          "previousStatus": "Present",
+          "newStatus": "Present",
+          "reason": "Updated via attendance sheet"
+        }
+      ]
+    },
+    {
+      "id": "att-1792600060599",
+      "meetingId": "meet-001",
+      "departmentId": "ALL",
+      "memberId": "mem-002",
+      "status": "Late",
+      "markedById": "mem-005",
+      "markedAt": "2026-10-21T16:27:40.599Z",
+      "notes": "",
+      "auditTrail": []
+    },
+    {
+      "id": "att-1792600063245",
+      "meetingId": "meet-001",
+      "departmentId": "ALL",
+      "memberId": "mem-003",
+      "status": "Late",
+      "markedById": "mem-005",
+      "markedAt": "2026-10-21T16:27:43.245Z",
+      "notes": "",
+      "auditTrail": [
+        {
+          "timestamp": "2026-10-21T16:45:40.875Z",
+          "changedById": "mem-006",
+          "previousStatus": "Excused",
+          "newStatus": "Late",
+          "reason": "Updated via attendance sheet"
+        }
+      ]
+    },
+    {
+      "id": "att-1792600064468",
+      "meetingId": "meet-001",
+      "departmentId": "ALL",
+      "memberId": "mem-004",
+      "status": "Absent",
+      "markedById": "mem-005",
+      "markedAt": "2026-10-21T16:27:44.468Z",
+      "notes": "",
+      "auditTrail": []
+    },
+    {
+      "id": "att-1792600065011",
+      "meetingId": "meet-001",
+      "departmentId": "ALL",
+      "memberId": "mem-005",
+      "status": "Absent",
+      "markedById": "mem-005",
+      "markedAt": "2026-10-21T16:27:45.011Z",
+      "notes": "",
+      "auditTrail": []
+    },
+    {
+      "id": "att-1792600065516",
+      "meetingId": "meet-001",
+      "departmentId": "ALL",
+      "memberId": "mem-007",
+      "status": "Excused",
+      "markedById": "mem-005",
+      "markedAt": "2026-10-21T16:27:45.516Z",
+      "notes": "",
+      "auditTrail": [
+        {
+          "timestamp": "2026-10-21T16:45:48.372Z",
+          "changedById": "mem-006",
+          "previousStatus": "Present",
+          "newStatus": "Excused",
+          "reason": "Updated via attendance sheet"
+        }
+      ]
+    },
+    {
+      "id": "att-1792601149190",
+      "meetingId": "meet-001",
+      "departmentId": "ALL",
+      "memberId": "mem-014",
+      "status": "Present",
+      "markedById": "mem-006",
+      "markedAt": "2026-10-21T16:45:49.190Z",
+      "notes": "",
       "auditTrail": []
     }
   ],
-  "correctionRequests": [],
+  "correctionRequests": [
+    {
+      "id": "cor-1792599867837",
+      "attendanceId": "att-1792533534554",
+      "meetingId": "meet-002",
+      "memberId": "mem-005",
+      "currentStatus": "Absent",
+      "requestedStatus": "Excused",
+      "reason": "yoyoyo",
+      "proofUrl": "",
+      "status": "Approved",
+      "createdAt": "2026-10-21T16:24:27.837Z",
+      "reviewedById": "mem-006",
+      "reviewedAt": "2026-10-21T16:45:56.201Z"
+    }
+  ],
   "tasks": [
     {
       "id": "task-001",
@@ -539,6 +891,38 @@
       "reviewerId": "mem-001",
       "isVerified": false,
       "createdAt": "2026-10-20T10:00:00.000Z"
+    },
+    {
+      "id": "task-1792533580744",
+      "title": "kk",
+      "description": "asda",
+      "category": "Attendance Management",
+      "departmentId": "digital-operations",
+      "assignedMemberId": "mem-001",
+      "createdById": "mem-001",
+      "priority": "Medium",
+      "status": "To Do",
+      "deadline": "2026-10-25",
+      "estimatedEffortHours": 3,
+      "actualEffortHours": 0,
+      "isVerified": false,
+      "createdAt": "2026-10-20T21:59:40.744Z"
+    },
+    {
+      "id": "task-1792601174902",
+      "title": "qwdwqd",
+      "description": "wdqwd",
+      "category": "MOM Preparation",
+      "departmentId": "human-resources",
+      "assignedMemberId": "mem-001",
+      "createdById": "mem-006",
+      "priority": "Medium",
+      "status": "To Do",
+      "deadline": "2026-10-26",
+      "estimatedEffortHours": 3,
+      "actualEffortHours": 0,
+      "isVerified": false,
+      "createdAt": "2026-10-21T16:46:14.902Z"
     }
   ],
   "events": [
@@ -568,15 +952,54 @@
         {
           "id": "chk-2",
           "task": "Audio-visual and live streaming check",
-          "isCompleted": true,
+          "isCompleted": false,
           "assignedTo": "mem-020"
         }
       ],
       "isArchived": false,
       "createdAt": "2026-10-10T10:00:00.000Z"
+    },
+    {
+      "id": "evt-1792533623355",
+      "title": "egeere",
+      "description": "",
+      "organizingDepartmentId": "digital-operations",
+      "supportingHrIds": [
+        "mem-014"
+      ],
+      "organizerIds": [
+        "mem-001"
+      ],
+      "venue": "VIPS Campus Auditorium",
+      "startDateTime": "2026-11-05T03:30:00.000Z",
+      "endDateTime": "2026-11-06T12:30:00.000Z",
+      "checklist": [
+        {
+          "id": "chk-1792533623355-0",
+          "task": "Permissions from Dean Office",
+          "isCompleted": true
+        },
+        {
+          "id": "chk-1792533623355-1",
+          "task": "Speaker Invitation Letters",
+          "isCompleted": false
+        }
+      ],
+      "isArchived": false,
+      "createdAt": "2026-10-20T22:00:23.355Z"
     }
   ],
   "announcements": [
+    {
+      "id": "ann-1792533635731",
+      "title": "werwerwe",
+      "content": "wfefw",
+      "authorId": "mem-001",
+      "departmentId": "ALL",
+      "isPinned": false,
+      "priority": "Normal",
+      "createdAt": "2026-10-20T22:00:35.731Z"
+    },
     {
       "id": "ann-001",
       "title": "Quarterly Townhall & Q3 Performance Commendations",
@@ -628,6 +1051,266 @@
       "link": "/dashboard",
       "isRead": false,
       "createdAt": "2026-10-20T21:55:24.973Z"
+    },
+    {
+      "id": "notif-1792533580744-mem-001",
+      "recipientMemberId": "mem-001",
+      "title": "New Task Assigned",
+      "message": "You have been assigned: \"kk\". Deadline: 2026-10-25.",
+      "type": "Task",
+      "link": "/tasks",
+      "isRead": false,
+      "createdAt": "2026-10-20T21:59:40.744Z"
+    },
+    {
+      "id": "notif-1792533623355-mem-001",
+      "recipientMemberId": "mem-001",
+      "title": "New Society Event Scheduled",
+      "message": "Event \"egeere\" has been scheduled at VIPS Campus Auditorium.",
+      "type": "Announcement",
+      "link": "/events",
+      "isRead": false,
+      "createdAt": "2026-10-20T22:00:23.355Z"
+    },
+    {
+      "id": "notif-1792533623355-mem-014",
+      "recipientMemberId": "mem-014",
+      "title": "New Society Event Scheduled",
+      "message": "Event \"egeere\" has been scheduled at VIPS Campus Auditorium.",
+      "type": "Announcement",
+      "link": "/events",
+      "isRead": false,
+      "createdAt": "2026-10-20T22:00:23.355Z"
+    },
+    {
+      "id": "notif-1792533635731-mem-001",
+      "recipientMemberId": "mem-001",
+      "title": "Announcement: werwerwe",
+      "message": "wfefw...",
+      "type": "Announcement",
+      "link": "/announcements",
+      "isRead": false,
+      "createdAt": "2026-10-20T22:00:35.731Z"
+    },
+    {
+      "id": "notif-1792533635731-mem-006",
+      "recipientMemberId": "mem-006",
+      "title": "Announcement: werwerwe",
+      "message": "wfefw...",
+      "type": "Announcement",
+      "link": "/announcements",
+      "isRead": false,
+      "createdAt": "2026-10-20T22:00:35.731Z"
+    },
+    {
+      "id": "notif-1792533635731-mem-002",
+      "recipientMemberId": "mem-002",
+      "title": "Announcement: werwerwe",
+      "message": "wfefw...",
+      "type": "Announcement",
+      "link": "/announcements",
+      "isRead": false,
+      "createdAt": "2026-10-20T22:00:35.731Z"
+    },
+    {
+      "id": "notif-1792533635731-mem-003",
+      "recipientMemberId": "mem-003",
+      "title": "Announcement: werwerwe",
+      "message": "wfefw...",
+      "type": "Announcement",
+      "link": "/announcements",
+      "isRead": false,
+      "createdAt": "2026-10-20T22:00:35.731Z"
+    },
+    {
+      "id": "notif-1792533635731-mem-004",
+      "recipientMemberId": "mem-004",
+      "title": "Announcement: werwerwe",
+      "message": "wfefw...",
+      "type": "Announcement",
+      "link": "/announcements",
+      "isRead": false,
+      "createdAt": "2026-10-20T22:00:35.731Z"
+    },
+    {
+      "id": "notif-1792533635731-mem-005",
+      "recipientMemberId": "mem-005",
+      "title": "Announcement: werwerwe",
+      "message": "wfefw...",
+      "type": "Announcement",
+      "link": "/announcements",
+      "isRead": false,
+      "createdAt": "2026-10-20T22:00:35.731Z"
+    },
+    {
+      "id": "notif-1792533635731-mem-007",
+      "recipientMemberId": "mem-007",
+      "title": "Announcement: werwerwe",
+      "message": "wfefw...",
+      "type": "Announcement",
+      "link": "/announcements",
+      "isRead": false,
+      "createdAt": "2026-10-20T22:00:35.731Z"
+    },
+    {
+      "id": "notif-1792533635731-mem-014",
+      "recipientMemberId": "mem-014",
+      "title": "Announcement: werwerwe",
+      "message": "wfefw...",
+      "type": "Announcement",
+      "link": "/announcements",
+      "isRead": false,
+      "createdAt": "2026-10-20T22:00:35.731Z"
+    },
+    {
+      "id": "notif-1792533635731-mem-020",
+      "recipientMemberId": "mem-020",
+      "title": "Announcement: werwerwe",
+      "message": "wfefw...",
+      "type": "Announcement",
+      "link": "/announcements",
+      "isRead": false,
+      "createdAt": "2026-10-20T22:00:35.731Z"
+    },
+    {
+      "id": "notif-1792533635731-mem-999",
+      "recipientMemberId": "mem-999",
+      "title": "Announcement: werwerwe",
+      "message": "wfefw...",
+      "type": "Announcement",
+      "link": "/announcements",
+      "isRead": false,
+      "createdAt": "2026-10-20T22:00:35.731Z"
+    },
+    {
+      "id": "notif-1792533635731-mem-1792533324830",
+      "recipientMemberId": "mem-1792533324830",
+      "title": "Announcement: werwerwe",
+      "message": "wfefw...",
+      "type": "Announcement",
+      "link": "/announcements",
+      "isRead": false,
+      "createdAt": "2026-10-20T22:00:35.731Z"
+    },
+    {
+      "id": "notif-1792599867838-mem-006",
+      "recipientMemberId": "mem-006",
+      "title": "Attendance Correction Request",
+      "message": "Member has submitted a correction request for meeting #meet-002.",
+      "type": "Attendance",
+      "link": "/attendance",
+      "isRead": false,
+      "createdAt": "2026-10-21T16:24:27.838Z"
+    },
+    {
+      "id": "notif-1792599888699-mem-999",
+      "recipientMemberId": "mem-999",
+      "title": "Membership Approved!",
+      "message": "Your registration has been approved by the HR team. Welcome to Enactus VIPS-TC!",
+      "type": "System",
+      "link": "/dashboard",
+      "isRead": false,
+      "createdAt": "2026-10-21T16:24:48.699Z"
+    },
+    {
+      "id": "notif-1792600675285-mem-001",
+      "recipientMemberId": "mem-001",
+      "title": "New Meeting Scheduled",
+      "message": "You are invited to \"abc\" on 2026-10-27 at 16:00.",
+      "type": "Meeting",
+      "link": "/calendar",
+      "isRead": false,
+      "createdAt": "2026-10-21T16:37:55.285Z"
+    },
+    {
+      "id": "notif-1792600675285-mem-006",
+      "recipientMemberId": "mem-006",
+      "title": "New Meeting Scheduled",
+      "message": "You are invited to \"abc\" on 2026-10-27 at 16:00.",
+      "type": "Meeting",
+      "link": "/calendar",
+      "isRead": false,
+      "createdAt": "2026-10-21T16:37:55.285Z"
+    },
+    {
+      "id": "notif-1792600675285-mem-002",
+      "recipientMemberId": "mem-002",
+      "title": "New Meeting Scheduled",
+      "message": "You are invited to \"abc\" on 2026-10-27 at 16:00.",
+      "type": "Meeting",
+      "link": "/calendar",
+      "isRead": false,
+      "createdAt": "2026-10-21T16:37:55.285Z"
+    },
+    {
+      "id": "notif-1792600675285-mem-003",
+      "recipientMemberId": "mem-003",
+      "title": "New Meeting Scheduled",
+      "message": "You are invited to \"abc\" on 2026-10-27 at 16:00.",
+      "type": "Meeting",
+      "link": "/calendar",
+      "isRead": false,
+      "createdAt": "2026-10-21T16:37:55.285Z"
+    },
+    {
+      "id": "notif-1792600675285-mem-004",
+      "recipientMemberId": "mem-004",
+      "title": "New Meeting Scheduled",
+      "message": "You are invited to \"abc\" on 2026-10-27 at 16:00.",
+      "type": "Meeting",
+      "link": "/calendar",
+      "isRead": false,
+      "createdAt": "2026-10-21T16:37:55.285Z"
+    },
+    {
+      "id": "notif-1792600675285-mem-005",
+      "recipientMemberId": "mem-005",
+      "title": "New Meeting Scheduled",
+      "message": "You are invited to \"abc\" on 2026-10-27 at 16:00.",
+      "type": "Meeting",
+      "link": "/calendar",
+      "isRead": false,
+      "createdAt": "2026-10-21T16:37:55.285Z"
+    },
+    {
+      "id": "notif-1792600675285-mem-007",
+      "recipientMemberId": "mem-007",
+      "title": "New Meeting Scheduled",
+      "message": "You are invited to \"abc\" on 2026-10-27 at 16:00.",
+      "type": "Meeting",
+      "link": "/calendar",
+      "isRead": false,
+      "createdAt": "2026-10-21T16:37:55.285Z"
+    },
+    {
+      "id": "notif-1792600675285-mem-014",
+      "recipientMemberId": "mem-014",
+      "title": "New Meeting Scheduled",
+      "message": "You are invited to \"abc\" on 2026-10-27 at 16:00.",
+      "type": "Meeting",
+      "link": "/calendar",
+      "isRead": false,
+      "createdAt": "2026-10-21T16:37:55.285Z"
+    },
+    {
+      "id": "notif-1792601156201-mem-005",
+      "recipientMemberId": "mem-005",
+      "title": "Attendance Correction Approved",
+      "message": "Your attendance correction request has been approved by leadership.",
+      "type": "Attendance",
+      "link": "/attendance",
+      "isRead": false,
+      "createdAt": "2026-10-21T16:45:56.201Z"
+    },
+    {
+      "id": "notif-1792601174902-mem-001",
+      "recipientMemberId": "mem-001",
+      "title": "New Task Assigned",
+      "message": "You have been assigned: \"qwdwqd\". Deadline: 2026-10-26.",
+      "type": "Task",
+      "link": "/tasks",
+      "isRead": false,
+      "createdAt": "2026-10-21T16:46:14.902Z"
     }
   ],
   "settings": {
@@ -662,5 +1345,7 @@
       8
     ],
     "currentAcademicYear": "2024-2025"
-  }
+  },
+  "auditLogs": [],
+  "momEditRequests": []
 }

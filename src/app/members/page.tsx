@@ -313,6 +313,24 @@ export default function MembersPage() {
       URL.revokeObjectURL(url);
     }
 
+    // Append to audit log
+    if (currentUser) {
+      fetch('/api/audit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: currentUser.id,
+          userName: currentUser.name,
+          userRole: currentUser.role,
+          action: 'DATA_EXPORT',
+          recordType: 'EXPORT',
+          recordId: `export-${Date.now()}`,
+          reason: `Exported ${targetMembers.length} records in ${exportFormat.toUpperCase()} format from Active Team Sheet`,
+          details: `Exported columns: ${activeCols.map((c) => c.label).join(', ')}`,
+        }),
+      }).catch(() => {});
+    }
+
     setShowExportModal(false);
   };
 
@@ -453,7 +471,7 @@ export default function MembersPage() {
               : 'text-[#637d74] hover:text-[#263832] hover:bg-white'
           }`}
         >
-          <span>Active Roster</span>
+          <span>Active Team Sheet</span>
           <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
             activeTab === 'active' ? 'bg-white/20 text-white' : 'bg-[#E3EBE7] text-[#263832]'
           }`}>
