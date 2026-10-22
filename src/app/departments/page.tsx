@@ -24,6 +24,13 @@ import {
   User,
   Sparkles,
   ExternalLink,
+  Mail,
+  Phone,
+  GraduationCap,
+  Award,
+  Shield,
+  Star,
+  Check,
 } from 'lucide-react';
 
 export default function DepartmentsPage() {
@@ -34,6 +41,7 @@ export default function DepartmentsPage() {
     meetings,
     moms,
     tasks,
+    attendance,
     updateTask,
     addDepartment,
     updateDepartment,
@@ -42,6 +50,7 @@ export default function DepartmentsPage() {
 
   // Active department selected for detail inspection
   const [selectedDeptId, setSelectedDeptId] = useState<string | null>(null);
+  const [inspectingMember, setInspectingMember] = useState<Member | null>(null);
   const [showAddDeptModal, setShowAddDeptModal] = useState(false);
   const [showEditDeptModal, setShowEditDeptModal] = useState(false);
 
@@ -137,6 +146,67 @@ export default function DepartmentsPage() {
     if (!selectedDeptId) return [];
     return moms.filter((m) => m.departmentId === selectedDeptId && m.publicationStatus === 'Published');
   }, [moms, selectedDeptId]);
+
+  // Comprehensive analytics for inspecting a member's department portfolio
+  const inspectingMemberStats = useMemo(() => {
+    if (!inspectingMember || !selectedDept) return null;
+
+    // Department specific tasks
+    const memberDeptTasks = tasks.filter(
+      (t) => t.departmentId === selectedDept.id && t.assignedMemberId === inspectingMember.id
+    );
+    const completedDeptTasks = memberDeptTasks.filter((t) => t.status === 'Completed');
+    const inProgressDeptTasks = memberDeptTasks.filter((t) => t.status === 'In Progress');
+    const blockedDeptTasks = memberDeptTasks.filter(
+      (t) => t.status === 'Overdue' || t.status === 'Under Review'
+    );
+    const taskRate =
+      memberDeptTasks.length > 0
+        ? Math.round((completedDeptTasks.length / memberDeptTasks.length) * 100)
+        : 0;
+
+    // Attendance records
+    const memAttendanceRecords = attendance.filter((a) => a.memberId === inspectingMember.id);
+    const eligibleMeetings = meetings.filter(
+      (mt) => mt.departmentId === 'ALL' || mt.departmentId === selectedDept.id
+    );
+    const presentCount = memAttendanceRecords.filter((a) => a.status === 'Present').length;
+    const lateCount = memAttendanceRecords.filter((a) => a.status === 'Late').length;
+    const excusedCount = memAttendanceRecords.filter(
+      (a) => a.status === 'Excused' || a.status === 'On Leave'
+    ).length;
+    const absentCount = memAttendanceRecords.filter((a) => a.status === 'Absent').length;
+    const attendedCount = presentCount + lateCount;
+
+    const effectiveTotal = Math.max(1, eligibleMeetings.length - excusedCount);
+    const attendanceRate = Math.min(100, Math.round((attendedCount / effectiveTotal) * 100));
+    const recordedHours = attendedCount * 1.5;
+    const scheduledHours = eligibleMeetings.length * 1.5;
+
+    // Attended MOMs
+    const attendedMOMs = moms.filter(
+      (m) => m.attendeeIds?.includes(inspectingMember.id) && m.publicationStatus === 'Published'
+    );
+
+    return {
+      memberDeptTasks,
+      completedDeptTasks,
+      inProgressDeptTasks,
+      blockedDeptTasks,
+      taskRate,
+      memAttendanceRecords,
+      eligibleMeetings,
+      presentCount,
+      lateCount,
+      excusedCount,
+      absentCount,
+      attendedCount,
+      attendanceRate,
+      recordedHours,
+      scheduledHours,
+      attendedMOMs,
+    };
+  }, [inspectingMember, selectedDept, tasks, attendance, meetings, moms]);
 
   // Update Task Status directly from department view
   const handleUpdateTaskStatus = async (taskId: string, newStatus: any) => {
@@ -490,26 +560,58 @@ export default function DepartmentsPage() {
 
               {/* Department Roster */}
               <div className="space-y-3">
-                <h4 className="text-xs font-bold text-[#263832] uppercase tracking-wider">
-                  Hub Roster ({deptMembers.length})
-                </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {deptMembers.map((m) => (
-                    <div
-                      key={m.id}
-                      className="flex items-center gap-2.5 rounded-xl border border-[#E3EBE7] bg-[#F7F9F7] p-2.5"
-                    >
-                      <img
-                        src={m.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100'}
-                        alt={m.name}
-                        className="h-8 w-8 rounded-lg object-cover border border-[#E3EBE7]"
-                      />
-                      <div className="min-w-0">
-                        <div className="truncate text-xs font-bold text-[#263832]">{m.name}</div>
-                        <div className="truncate text-[10px] text-[#0D5143]">{m.roleTitle}</div>
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-bold text-[#263832] uppercase tracking-wider">
+                    Hub Roster ({deptMembers.length})
+                  </h4>
+                  <span className="text-[10px] text-[#82918B]">Click any member to inspect portfolio & metrics</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  {deptMembers.map((m) => {
+                    const mTasks = tasks.filter(
+                      (t) => t.departmentId === selectedDept.id && t.assignedMemberId === m.id
+                    );
+                    const mDone = mTasks.filter((t) => t.status === 'Completed').length;
+                    const mRate =
+                      mTasks.length > 0 ? Math.round((mDone / mTasks.length) * 100) : 0;
+
+                    return (
+                      <div
+                        key={m.id}
+                        onClick={() => setInspectingMember(m)}
+                        className="cursor-pointer flex items-center justify-between gap-2.5 rounded-2xl border border-[#E3EBE7] bg-[#F7F9F7] p-3 hover:bg-white hover:border-[#2FC3A5] hover:shadow-xs transition select-none group"
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <img
+                            src={
+                              m.avatar ||
+                              'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100'
+                            }
+                            alt={m.name}
+                            className="h-9 w-9 rounded-xl object-cover border border-[#E3EBE7] shrink-0"
+                          />
+                          <div className="min-w-0">
+                            <div className="truncate text-xs font-bold text-[#263832] group-hover:text-[#0D5143]">
+                              {m.name}
+                            </div>
+                            <div className="truncate text-[10px] text-[#0D5143] font-semibold">
+                              {m.roleTitle}
+                            </div>
+                            <div className="text-[10px] text-[#82918B] font-mono">{m.memberId}</div>
+                          </div>
+                        </div>
+
+                        <div className="text-right shrink-0">
+                          <span className="text-[10px] font-bold text-[#0D5143] bg-[#E7F3D7] px-2 py-0.5 rounded-full block">
+                            {mRate}% Tasks
+                          </span>
+                          <span className="text-[9px] text-[#82918B] block mt-0.5">
+                            {mDone}/{mTasks.length} Done
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
 
@@ -531,6 +633,254 @@ export default function DepartmentsPage() {
                   </Link>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ==================== MEMBER HUB PORTFOLIO & PROGRESS MODAL ==================== */}
+      {inspectingMember && inspectingMemberStats && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm animate-fadeIn">
+          <div className="w-full max-w-2xl max-h-[90vh] flex flex-col rounded-3xl border border-[#E3EBE7] bg-white shadow-2xl overflow-hidden">
+            {/* Modal Header Banner */}
+            <div className="h-24 w-full bg-gradient-to-r from-[#DDF7EF] via-[#E7F3D7] to-[#F7F9F7] p-4 relative flex items-start justify-between">
+              <span className="rounded-full bg-white/90 px-3 py-1 text-[11px] font-bold text-[#0D5143] shadow-xs">
+                {selectedDept?.name} • Member Portfolio
+              </span>
+              <button
+                onClick={() => setInspectingMember(null)}
+                className="rounded-full bg-white/80 p-1.5 text-[#637d74] hover:text-[#263832] transition shadow-xs"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Profile Bar */}
+            <div className="px-6 pb-2 -mt-10 flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+              <div className="flex items-end gap-3.5">
+                <img
+                  src={
+                    inspectingMember.avatar ||
+                    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'
+                  }
+                  alt={inspectingMember.name}
+                  className="h-20 w-20 rounded-2xl border-4 border-white bg-white object-cover shadow-md shrink-0"
+                />
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-lg font-black text-[#263832]">{inspectingMember.name}</h3>
+                    <span className="rounded-full bg-[#E7F3D7] px-2 py-0.5 text-[10px] font-bold text-[#0D5143]">
+                      {inspectingMember.membershipStatus || 'ACTIVE'}
+                    </span>
+                  </div>
+                  <div className="text-xs font-bold text-[#2FC3A5]">{inspectingMember.roleTitle}</div>
+                  <div className="text-[11px] font-mono text-[#82918B]">{inspectingMember.memberId}</div>
+                </div>
+              </div>
+
+              {inspectingMember.email && (
+                <a
+                  href={`mailto:${inspectingMember.email}`}
+                  className="flex items-center gap-1.5 rounded-xl border border-[#2FC3A5] bg-white px-3 py-1.5 text-xs font-bold text-[#0D5143] hover:bg-[#DDF7EF] transition shadow-xs self-start sm:self-end"
+                >
+                  <Mail className="h-3.5 w-3.5 text-[#2FC3A5]" />
+                  <span>Send Email</span>
+                </a>
+              )}
+            </div>
+
+            {/* Modal Body */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-5">
+              {/* Bio Statement if present */}
+              {inspectingMember.bio && (
+                <div className="rounded-2xl border border-[#E3EBE7] bg-[#F7F9F7] p-3 text-xs text-[#637d74] leading-relaxed">
+                  "{inspectingMember.bio}"
+                </div>
+              )}
+
+              {/* Quick Metrics Strip */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-center text-xs">
+                {/* 1. Hub Task Progress */}
+                <div className="rounded-2xl border border-[#E3EBE7] bg-[#F7F9F7] p-3">
+                  <div className="text-[10px] font-bold uppercase text-[#82918B]">Tasks in Hub</div>
+                  <div className="text-lg font-black text-[#0D5143] mt-0.5">
+                    {inspectingMemberStats.taskRate}% Done
+                  </div>
+                  <div className="text-[10px] text-[#637d74]">
+                    {inspectingMemberStats.completedDeptTasks.length}/
+                    {inspectingMemberStats.memberDeptTasks.length} Completed
+                  </div>
+                </div>
+
+                {/* 2. Hub Attendance */}
+                <div className="rounded-2xl border border-[#E3EBE7] bg-[#F7F9F7] p-3">
+                  <div className="text-[10px] font-bold uppercase text-[#82918B]">Sync Attendance</div>
+                  <div className="text-lg font-black text-[#2FC3A5] mt-0.5">
+                    {inspectingMemberStats.attendanceRate}%
+                  </div>
+                  <div className="text-[10px] text-[#637d74]">
+                    {inspectingMemberStats.attendedCount}/
+                    {inspectingMemberStats.eligibleMeetings.length} Attended
+                  </div>
+                </div>
+
+                {/* 3. Recorded Hours */}
+                <div className="rounded-2xl border border-[#E3EBE7] bg-[#F7F9F7] p-3">
+                  <div className="text-[10px] font-bold uppercase text-[#82918B]">Recorded Hours</div>
+                  <div className="text-lg font-black text-[#263832] mt-0.5">
+                    {inspectingMemberStats.recordedHours} hrs
+                  </div>
+                  <div className="text-[10px] text-[#637d74]">
+                    of {inspectingMemberStats.scheduledHours} hrs sched.
+                  </div>
+                </div>
+
+                {/* 4. Academic Details */}
+                <div className="rounded-2xl border border-[#E3EBE7] bg-[#F7F9F7] p-3">
+                  <div className="text-[10px] font-bold uppercase text-[#82918B]">Academic Year</div>
+                  <div className="text-lg font-black text-[#263832] mt-0.5">
+                    Sem {inspectingMember.currentSemester}
+                  </div>
+                  <div className="text-[10px] text-[#637d74] truncate">
+                    {inspectingMember.branch}
+                  </div>
+                </div>
+              </div>
+
+              {/* Task Deliverables Breakdown with Progress Bar */}
+              <div className="rounded-2xl border border-[#E3EBE7] bg-white p-4 shadow-xs space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-bold text-xs text-[#263832] uppercase tracking-wider">
+                      Department Assigned Tasks ({inspectingMemberStats.memberDeptTasks.length})
+                    </h4>
+                    <span className="text-[11px] text-[#82918B]">
+                      {inspectingMemberStats.completedDeptTasks.length} tasks completed •{' '}
+                      {inspectingMemberStats.inProgressDeptTasks.length} in progress
+                    </span>
+                  </div>
+                  <span className="text-sm font-black text-[#0D5143] bg-[#E7F3D7] px-2.5 py-0.5 rounded-full">
+                    {inspectingMemberStats.taskRate}% Complete
+                  </span>
+                </div>
+
+                <div className="h-2.5 w-full rounded-full bg-[#E3EBE7] overflow-hidden">
+                  <div
+                    className="h-full bg-[#2FC3A5] rounded-full transition-all duration-500"
+                    style={{ width: `${inspectingMemberStats.taskRate}%` }}
+                  />
+                </div>
+
+                <div className="space-y-2 pt-1 max-h-48 overflow-y-auto">
+                  {inspectingMemberStats.memberDeptTasks.length === 0 ? (
+                    <div className="p-4 text-center text-xs text-[#82918B] bg-[#F7F9F7] rounded-xl">
+                      No deliverables currently assigned in this hub.
+                    </div>
+                  ) : (
+                    inspectingMemberStats.memberDeptTasks.map((t) => (
+                      <div
+                        key={t.id}
+                        className="flex items-center justify-between gap-2 rounded-xl border border-[#E3EBE7] bg-[#F7F9F7] p-2.5 text-xs"
+                      >
+                        <div className="min-w-0">
+                          <div className="font-bold text-[#263832] truncate">{t.title}</div>
+                          <div className="text-[10px] text-[#82918B] flex items-center gap-1.5 mt-0.5">
+                            <Clock className="h-3 w-3 text-[#2FC3A5]" />
+                            <span>Deadline: {t.deadline}</span>
+                          </div>
+                        </div>
+
+                        <span
+                          className={`rounded-lg px-2 py-0.5 text-[10px] font-bold shrink-0 ${
+                            t.status === 'Completed'
+                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                              : t.status === 'In Progress'
+                              ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                              : 'bg-amber-50 text-amber-800 border border-amber-200'
+                          }`}
+                        >
+                          {t.status}
+                        </span>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              {/* Attendance Breakdown & Quorum Status */}
+              <div className="rounded-2xl border border-[#E3EBE7] bg-[#F7F9F7] p-4 text-xs space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-bold text-[#263832] uppercase tracking-wider text-[11px]">
+                    Meeting Attendance Record
+                  </h4>
+                  <span
+                    className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
+                      inspectingMemberStats.attendanceRate >= 75
+                        ? 'bg-emerald-100 text-emerald-800'
+                        : 'bg-rose-100 text-rose-800'
+                    }`}
+                  >
+                    {inspectingMemberStats.attendanceRate >= 75
+                      ? '✓ Quorum Compliant'
+                      : '⚠ Short Attendance'}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-4 gap-2 text-center">
+                  <div className="rounded-xl bg-white p-2 border border-[#E3EBE7]">
+                    <span className="text-[10px] text-[#82918B] block">Present</span>
+                    <span className="font-bold text-[#0D5143]">
+                      {inspectingMemberStats.presentCount}
+                    </span>
+                  </div>
+                  <div className="rounded-xl bg-white p-2 border border-[#E3EBE7]">
+                    <span className="text-[10px] text-[#82918B] block">Late</span>
+                    <span className="font-bold text-amber-700">
+                      {inspectingMemberStats.lateCount}
+                    </span>
+                  </div>
+                  <div className="rounded-xl bg-white p-2 border border-[#E3EBE7]">
+                    <span className="text-[10px] text-[#82918B] block">Excused</span>
+                    <span className="font-bold text-blue-700">
+                      {inspectingMemberStats.excusedCount}
+                    </span>
+                  </div>
+                  <div className="rounded-xl bg-white p-2 border border-[#E3EBE7]">
+                    <span className="text-[10px] text-[#82918B] block">Absent</span>
+                    <span className="font-bold text-rose-700">
+                      {inspectingMemberStats.absentCount}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Attended Published MoMs in this Hub */}
+              {inspectingMemberStats.attendedMOMs.length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#263832]">
+                    Attended Published MoMs ({inspectingMemberStats.attendedMOMs.length})
+                  </h4>
+                  <div className="space-y-1.5">
+                    {inspectingMemberStats.attendedMOMs.map((mom) => (
+                      <div
+                        key={mom.id}
+                        className="flex items-center justify-between rounded-xl border border-[#E3EBE7] bg-white p-2.5 text-xs"
+                      >
+                        <div className="min-w-0">
+                          <span className="font-bold text-[#263832] block truncate">{mom.title}</span>
+                          <span className="text-[10px] text-[#82918B]">{mom.meetingDate}</span>
+                        </div>
+                        <Link
+                          href="/moms"
+                          className="text-[10px] font-bold text-[#0D5143] hover:underline"
+                        >
+                          View MoM &rarr;
+                        </Link>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
