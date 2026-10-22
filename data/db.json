@@ -75,7 +75,7 @@
       "passwordHash": "f03ea21afe442a64dc8fe2b32f2bdbba2213607f1c327e1bcf5ae5c7933f9c763dfa3af96543cf0122fe0236bd60879dcbda406cb8614dc150eccd56361a88f1",
       "authProvider": "email",
       "approvalStatus": "APPROVED",
-      "membershipStatus": "SUSPENDED",
+      "membershipStatus": "ACTIVE",
       "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
       "collegeEnrollment": "04517702022",
       "jeeRank": 12450,
@@ -90,8 +90,8 @@
       "phone": "+91 98110 12345",
       "bio": "Passionate about social entrepreneurship and scalable impact. Leading Enactus VIPS-TC to national excellence.",
       "createdAt": "2022-08-10T10:00:00.000Z",
-      "statusChangeReason": "werwer",
-      "statusChangedAt": "2026-10-21T16:41:07.247Z"
+      "statusChangeReason": "REACTIVATE by Ishaan Saxena",
+      "statusChangedAt": "2026-10-22T17:38:56.506Z"
     },
     {
       "id": "mem-006",
@@ -243,7 +243,7 @@
       "passwordHash": "f03ea21afe442a64dc8fe2b32f2bdbba2213607f1c327e1bcf5ae5c7933f9c763dfa3af96543cf0122fe0236bd60879dcbda406cb8614dc150eccd56361a88f1",
       "authProvider": "email",
       "approvalStatus": "APPROVED",
-      "membershipStatus": "SUSPENDED",
+      "membershipStatus": "ACTIVE",
       "avatar": "https://images.unsplash.com/photo-1544717305-2782549b5136?w=150&auto=format&fit=crop&q=80",
       "collegeEnrollment": "04517702075",
       "jeeRank": 24500,
@@ -258,8 +258,8 @@
       "status": "Active",
       "phone": "+91 97111 12345",
       "createdAt": "2024-08-20T10:00:00.000Z",
-      "statusChangeReason": "4rrf",
-      "statusChangedAt": "2026-10-21T16:24:56.827Z"
+      "statusChangeReason": "REACTIVATE by Ishaan Saxena",
+      "statusChangedAt": "2026-10-22T17:39:14.284Z"
     },
     {
       "id": "mem-020",
@@ -357,6 +357,28 @@
       "status": "Active",
       "phone": "+91 98990 00112",
       "createdAt": "2022-08-01T10:00:00.000Z"
+    },
+    {
+      "id": "mem-1792695870930",
+      "memberId": "ENVIPS-2026-013",
+      "name": "abcd",
+      "email": "abcd@gmail.com",
+      "passwordHash": "6396f2a09274e19d3261f01fee6a5a77f3e80d5cc8ad7c5edc5a2e142afceb2fa8bcd677e519d5a7b4381ca8c9337a5046f826aa6484ee6a378b2d93f93fb3d4",
+      "authProvider": "email",
+      "approvalStatus": "PENDING",
+      "membershipStatus": "ACTIVE",
+      "avatar": "https://api.dicebear.com/7.x/initials/svg?seed=abcd",
+      "collegeEnrollment": "Pending Verification",
+      "currentSemester": 1,
+      "academicYear": "1st Year",
+      "branch": "Computer Science & Engineering",
+      "yearOfJoining": 2026,
+      "primaryDepartmentId": "digital-operations",
+      "role": "general_member",
+      "roleTitle": "Applicant (Pending Approval)",
+      "status": "Active",
+      "phone": "",
+      "createdAt": "2026-10-22T19:04:30.931Z"
     }
   ],
   "meetings": [
@@ -558,6 +580,41 @@
       ],
       "createdAt": "2026-10-21T16:43:10.622Z",
       "updatedAt": "2026-10-21T16:43:10.622Z"
+    },
+    {
+      "id": "mom-1792695706996",
+      "meetingId": "meeting-1792695706722",
+      "departmentId": "pr-finance",
+      "title": "fwe",
+      "meetingDate": "2026-10-22",
+      "startTime": "15:00",
+      "endTime": "16:30",
+      "meetingType": "Online",
+      "location": "Google Meet",
+      "agenda": "fewfwf",
+      "objectives": "",
+      "attendeeIds": [],
+      "absenteeIds": [],
+      "discussionPoints": [
+        {
+          "topic": "Operational Updates",
+          "notes": ""
+        }
+      ],
+      "decisionsMade": [],
+      "actionItems": [],
+      "preparedById": "mem-014",
+      "publicationStatus": "Draft",
+      "isEditedAfterPublishing": false,
+      "revisionHistory": [
+        {
+          "timestamp": "2026-10-22T19:01:46.997Z",
+          "editorId": "mem-014",
+          "note": "Initial draft created."
+        }
+      ],
+      "createdAt": "2026-10-22T19:01:46.998Z",
+      "updatedAt": "2026-10-22T19:01:46.998Z"
     }
   ],
   "attendance": [
@@ -744,7 +801,7 @@
       "status": "Present",
       "markedById": "mem-005",
       "markedAt": "2026-10-21T16:27:39.460Z",
-      "notes": "",
+      "notes": "MANUAL entry marked on 10/22/2026",
       "auditTrail": [
         {
           "timestamp": "2026-10-21T16:45:39.690Z",
@@ -752,6 +809,13 @@
           "previousStatus": "Present",
           "newStatus": "Present",
           "reason": "Updated via attendance sheet"
+        },
+        {
+          "timestamp": "2026-10-22T17:52:43.570Z",
+          "changedById": "mem-006",
+          "previousStatus": "Present",
+          "newStatus": "Present",
+          "reason": "Bulk attendance update"
         }
       ]
     },
@@ -763,8 +827,16 @@
       "status": "Late",
       "markedById": "mem-005",
       "markedAt": "2026-10-21T16:27:40.599Z",
-      "notes": "",
-      "auditTrail": []
+      "notes": "MANUAL entry marked on 10/22/2026",
+      "auditTrail": [
+        {
+          "timestamp": "2026-10-22T17:52:43.570Z",
+          "changedById": "mem-006",
+          "previousStatus": "Late",
+          "newStatus": "Late",
+          "reason": "Bulk attendance update"
+        }
+      ]
     },
     {
       "id": "att-1792600063245",
@@ -793,8 +865,16 @@
       "status": "Absent",
       "markedById": "mem-005",
       "markedAt": "2026-10-21T16:27:44.468Z",
-      "notes": "",
-      "auditTrail": []
+      "notes": "MANUAL entry marked on 10/22/2026",
+      "auditTrail": [
+        {
+          "timestamp": "2026-10-22T17:52:43.570Z",
+          "changedById": "mem-006",
+          "previousStatus": "Absent",
+          "newStatus": "Absent",
+          "reason": "Bulk attendance update"
+        }
+      ]
     },
     {
       "id": "att-1792600065011",
@@ -804,8 +884,16 @@
       "status": "Absent",
       "markedById": "mem-005",
       "markedAt": "2026-10-21T16:27:45.011Z",
-      "notes": "",
-      "auditTrail": []
+      "notes": "MANUAL entry marked on 10/22/2026",
+      "auditTrail": [
+        {
+          "timestamp": "2026-10-22T17:52:43.570Z",
+          "changedById": "mem-006",
+          "previousStatus": "Absent",
+          "newStatus": "Absent",
+          "reason": "Bulk attendance update"
+        }
+      ]
     },
     {
       "id": "att-1792600065516",
@@ -815,7 +903,7 @@
       "status": "Excused",
       "markedById": "mem-005",
       "markedAt": "2026-10-21T16:27:45.516Z",
-      "notes": "",
+      "notes": "MANUAL entry marked on 10/22/2026",
       "auditTrail": [
         {
           "timestamp": "2026-10-21T16:45:48.372Z",
@@ -823,6 +911,13 @@
           "previousStatus": "Present",
           "newStatus": "Excused",
           "reason": "Updated via attendance sheet"
+        },
+        {
+          "timestamp": "2026-10-22T17:52:43.570Z",
+          "changedById": "mem-006",
+          "previousStatus": "Excused",
+          "newStatus": "Excused",
+          "reason": "Bulk attendance update"
         }
       ]
     },
@@ -834,7 +929,75 @@
       "status": "Present",
       "markedById": "mem-006",
       "markedAt": "2026-10-21T16:45:49.190Z",
-      "notes": "",
+      "notes": "MANUAL entry marked on 10/22/2026",
+      "auditTrail": [
+        {
+          "timestamp": "2026-10-22T17:52:43.570Z",
+          "changedById": "mem-006",
+          "previousStatus": "Present",
+          "newStatus": "Present",
+          "reason": "Bulk attendance update"
+        }
+      ]
+    },
+    {
+      "id": "att-1792691563570-mem-001",
+      "meetingId": "meet-001",
+      "departmentId": "ALL",
+      "memberId": "mem-001",
+      "status": "Present",
+      "markedById": "mem-006",
+      "markedAt": "2026-10-22T17:52:43.570Z",
+      "notes": "MANUAL entry marked on 10/22/2026",
+      "recordingSource": "manual",
+      "auditTrail": []
+    },
+    {
+      "id": "att-1792691563570-mem-020",
+      "meetingId": "meet-001",
+      "departmentId": "ALL",
+      "memberId": "mem-020",
+      "status": "Present",
+      "markedById": "mem-006",
+      "markedAt": "2026-10-22T17:52:43.570Z",
+      "notes": "MANUAL entry marked on 10/22/2026",
+      "recordingSource": "manual",
+      "auditTrail": []
+    },
+    {
+      "id": "att-1792691563570-mem-999",
+      "meetingId": "meet-001",
+      "departmentId": "ALL",
+      "memberId": "mem-999",
+      "status": "Present",
+      "markedById": "mem-006",
+      "markedAt": "2026-10-22T17:52:43.570Z",
+      "notes": "MANUAL entry marked on 10/22/2026",
+      "recordingSource": "manual",
+      "auditTrail": []
+    },
+    {
+      "id": "att-1792691563570-mem-1792533324830",
+      "meetingId": "meet-001",
+      "departmentId": "ALL",
+      "memberId": "mem-1792533324830",
+      "status": "Present",
+      "markedById": "mem-006",
+      "markedAt": "2026-10-22T17:52:43.570Z",
+      "notes": "MANUAL entry marked on 10/22/2026",
+      "recordingSource": "manual",
+      "auditTrail": []
+    },
+    {
+      "id": "att-1792691563570-mem-dev-01",
+      "meetingId": "meet-001",
+      "departmentId": "ALL",
+      "memberId": "mem-dev-01",
+      "status": "Present",
+      "markedById": "mem-006",
+      "markedAt": "2026-10-22T17:52:43.570Z",
+      "notes": "MANUAL entry marked on 10/22/2026",
+      "recordingSource": "manual",
       "auditTrail": []
     }
   ],
@@ -884,13 +1047,14 @@
       "assignedMemberId": "mem-006",
       "createdById": "mem-001",
       "priority": "High",
-      "status": "In Progress",
+      "status": "Completed",
       "deadline": "2026-10-22",
       "estimatedEffortHours": 4,
-      "actualEffortHours": 2,
+      "actualEffortHours": 4.5,
       "reviewerId": "mem-001",
       "isVerified": false,
-      "createdAt": "2026-10-20T10:00:00.000Z"
+      "createdAt": "2026-10-20T10:00:00.000Z",
+      "completedAt": "2026-10-22T17:46:55.127Z"
     },
     {
       "id": "task-1792533580744",
@@ -1019,7 +1183,7 @@
       "message": "Vikramaditya Oberoi has registered and is pending approval in the HR Queue.",
       "type": "System",
       "link": "/members",
-      "isRead": false,
+      "isRead": true,
       "createdAt": "2026-10-21T01:05:00.000Z"
     },
     {
@@ -1039,7 +1203,7 @@
       "message": "Pooja Malhotra has registered and is pending approval in the HR Queue.",
       "type": "System",
       "link": "/members",
-      "isRead": false,
+      "isRead": true,
       "createdAt": "2026-10-20T21:55:24.831Z"
     },
     {
@@ -1311,6 +1475,26 @@
       "link": "/tasks",
       "isRead": false,
       "createdAt": "2026-10-21T16:46:14.902Z"
+    },
+    {
+      "id": "notif-1792695870931-mem-001",
+      "recipientMemberId": "mem-001",
+      "title": "New Member Approval Request",
+      "message": "abcd has registered and is pending approval in the HR Queue.",
+      "type": "System",
+      "link": "/members",
+      "isRead": false,
+      "createdAt": "2026-10-22T19:04:30.931Z"
+    },
+    {
+      "id": "notif-1792695870931-mem-006",
+      "recipientMemberId": "mem-006",
+      "title": "New Member Approval Request",
+      "message": "abcd has registered and is pending approval in the HR Queue.",
+      "type": "System",
+      "link": "/members",
+      "isRead": false,
+      "createdAt": "2026-10-22T19:04:30.931Z"
     }
   ],
   "settings": {
@@ -1346,6 +1530,35 @@
     ],
     "currentAcademicYear": "2024-2025"
   },
-  "auditLogs": [],
+  "auditLogs": [
+    {
+      "id": "aud-1792695118987-3mjsf",
+      "timestamp": "2026-10-22T18:51:58.988Z",
+      "correlationId": "req-1792695118988",
+      "userId": "mem-002",
+      "userName": "Rhea Kapoor",
+      "userRole": "vp_1",
+      "action": "DATA_EXPORT",
+      "recordType": "EXPORT",
+      "recordId": "export-1792695118437",
+      "reason": "Exported 5 records in XLSX format from Active Team Sheet",
+      "ipAddress": "::1",
+      "details": "Exported columns: Member ID, Full Name, System Role, Department, Semester, Membership Status"
+    },
+    {
+      "id": "aud-1792690781275-jolj6",
+      "timestamp": "2026-10-22T17:39:41.275Z",
+      "correlationId": "req-1792690781275",
+      "userId": "mem-006",
+      "userName": "Ishaan Saxena",
+      "userRole": "hr_head",
+      "action": "DATA_EXPORT",
+      "recordType": "EXPORT",
+      "recordId": "export-1792690780980",
+      "reason": "Exported 3 records in XLSX format from Active Team Sheet",
+      "ipAddress": "::1",
+      "details": "Exported columns: Member ID, Full Name, Designation / Title, System Role, Department, Semester, Membership Status, Email, College Enrollment, JEE Rank"
+    }
+  ],
   "momEditRequests": []
 }
