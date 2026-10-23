@@ -365,7 +365,7 @@
       "email": "abcd@gmail.com",
       "passwordHash": "6396f2a09274e19d3261f01fee6a5a77f3e80d5cc8ad7c5edc5a2e142afceb2fa8bcd677e519d5a7b4381ca8c9337a5046f826aa6484ee6a378b2d93f93fb3d4",
       "authProvider": "email",
-      "approvalStatus": "PENDING",
+      "approvalStatus": "APPROVED",
       "membershipStatus": "ACTIVE",
       "avatar": "https://api.dicebear.com/7.x/initials/svg?seed=abcd",
       "collegeEnrollment": "Pending Verification",
@@ -375,10 +375,38 @@
       "yearOfJoining": 2026,
       "primaryDepartmentId": "digital-operations",
       "role": "general_member",
-      "roleTitle": "Applicant (Pending Approval)",
+      "roleTitle": "Active Member",
       "status": "Active",
       "phone": "",
-      "createdAt": "2026-10-22T19:04:30.931Z"
+      "createdAt": "2026-10-22T19:04:30.931Z",
+      "statusChangeReason": "APPROVE by Ishaan Saxena",
+      "statusChangedAt": "2026-10-23T07:57:18.174Z"
+    },
+    {
+      "id": "mem-1792742124526",
+      "memberId": "ENVIPS-2026-014",
+      "name": "jnhkhb",
+      "email": "nkugkgk@gmail.com",
+      "avatar": "https://api.dicebear.com/7.x/initials/svg?seed=jnhkhb",
+      "collegeEnrollment": "0876543367689",
+      "jeeRank": null,
+      "currentSemester": 3,
+      "academicYear": "1st Year",
+      "branch": "Computer Science & Engineering",
+      "yearOfJoining": 2026,
+      "primaryDepartmentId": "digital-operations",
+      "additionalDepartmentId": null,
+      "role": "general_member",
+      "roleTitle": "Active Member",
+      "assignedDepartmentId": null,
+      "assignedSecondaryHrId": null,
+      "status": "Active",
+      "approvalStatus": "APPROVED",
+      "membershipStatus": "ACTIVE",
+      "authProvider": "email",
+      "phone": "",
+      "bio": "",
+      "createdAt": "2026-10-23T07:55:24.526Z"
     }
   ],
   "meetings": [
@@ -1015,6 +1043,18 @@
       "createdAt": "2026-10-21T16:24:27.837Z",
       "reviewedById": "mem-006",
       "reviewedAt": "2026-10-21T16:45:56.201Z"
+    },
+    {
+      "id": "cor-1792742199017",
+      "attendanceId": "att-1792600059460",
+      "meetingId": "meet-001",
+      "memberId": "mem-006",
+      "currentStatus": "Absent",
+      "requestedStatus": "Excused",
+      "reason": "tgrthgt",
+      "proofUrl": "",
+      "status": "Pending",
+      "createdAt": "2026-10-23T07:56:39.017Z"
     }
   ],
   "tasks": [
@@ -1515,6 +1555,36 @@
       "link": "/members",
       "isRead": false,
       "createdAt": "2026-10-23T07:46:52.819Z"
+    },
+    {
+      "id": "notif-1792742124526",
+      "recipientMemberId": "mem-1792742124526",
+      "title": "Welcome to Enactus VIPS-TC",
+      "message": "Your society portal account has been provisioned. Department: digital-operations.",
+      "type": "System",
+      "link": "/dashboard",
+      "isRead": false,
+      "createdAt": "2026-10-23T07:55:24.526Z"
+    },
+    {
+      "id": "notif-1792742199017-mem-006",
+      "recipientMemberId": "mem-006",
+      "title": "Attendance Correction Request",
+      "message": "Member has submitted a correction request for meeting #meet-001.",
+      "type": "Attendance",
+      "link": "/attendance",
+      "isRead": false,
+      "createdAt": "2026-10-23T07:56:39.017Z"
+    },
+    {
+      "id": "notif-1792742238174-mem-1792695870930",
+      "recipientMemberId": "mem-1792695870930",
+      "title": "Membership Approved!",
+      "message": "Your registration has been approved by the HR team. Welcome to Enactus VIPS-TC!",
+      "type": "System",
+      "link": "/dashboard",
+      "isRead": false,
+      "createdAt": "2026-10-23T07:57:18.174Z"
     }
   ],
   "settings": {
