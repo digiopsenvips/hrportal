@@ -10,7 +10,7 @@ interface AuthContextType {
   permissions: UserPermissions;
   isLoading: boolean;
   login: (email: string, password?: string) => Promise<{ success: boolean; message?: string }>;
-  register: (payload: any) => Promise<{ success: boolean; message?: string }>;
+  register: (payload: any) => Promise<{ success: boolean; message?: string; user?: any }>;
   logout: () => void;
   switchRoleMember: (memberId: string) => void;
   updateCurrentUserProfile: (updatedData: Partial<Member>) => Promise<boolean>;
@@ -116,12 +116,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       const data = await res.json();
       if (!res.ok) {
-        return { success: false, message: data.error || 'Registration failed' };
+        return { success: false, message: data.error || data.message || 'Registration failed' };
       }
 
-      localStorage.setItem('enactus_user_id', data.user.id);
-      router.push('/pending-approval');
-      return { success: true, message: data.message };
+      if (data.user?.id) {
+        localStorage.setItem('enactus_user_id', data.user.id);
+      }
+      return { success: true, user: data.user, message: data.message };
     } catch (err: any) {
       return { success: false, message: err.message || 'Registration error' };
     }

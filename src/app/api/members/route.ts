@@ -16,8 +16,9 @@ export async function POST(req: NextRequest) {
     const db = getDatabase();
 
     // Validate required fields
-    if (!body.name || !body.email || !body.primaryDepartmentId) {
-      return errorResponse('Missing required fields (Name, Email, Primary Department)', 400);
+    const primaryDept = body.primaryDepartmentId || body.departmentId;
+    if (!body.name || !body.email || !primaryDept) {
+      return errorResponse('Missing required fields (Name, Email, Department)', 400);
     }
 
     // Check duplicate email or enrollment
@@ -49,13 +50,13 @@ export async function POST(req: NextRequest) {
       collegeEnrollment: body.collegeEnrollment || 'N/A',
       jeeRank: body.jeeRank ? Number(body.jeeRank) : null,
       currentSemester: Number(body.currentSemester) || 3,
-      academicYear: body.academicYear || '2nd Year',
+      academicYear: body.academicYear || body.yearInSociety || '2nd Year',
       branch: body.branch || 'General',
       yearOfJoining: Number(body.yearOfJoining) || new Date().getFullYear(),
-      primaryDepartmentId: body.primaryDepartmentId,
+      primaryDepartmentId: primaryDept,
       additionalDepartmentId: body.additionalDepartmentId || null,
       role: body.role || 'general_member',
-      roleTitle: body.roleTitle || 'General Member',
+      roleTitle: body.roleTitle || body.designation || 'General Member',
       assignedDepartmentId: body.assignedDepartmentId || null,
       assignedSecondaryHrId: body.assignedSecondaryHrId || null,
       status: body.status || 'Active',

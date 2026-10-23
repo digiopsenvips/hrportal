@@ -1495,6 +1495,26 @@
       "link": "/members",
       "isRead": false,
       "createdAt": "2026-10-22T19:04:30.931Z"
+    },
+    {
+      "id": "notif-1792741612819-mem-001",
+      "recipientMemberId": "mem-001",
+      "title": "New Member Application",
+      "message": "Ananya Sharma has registered for Core Team Member in digital-operations and is awaiting HR verification.",
+      "type": "System",
+      "link": "/members",
+      "isRead": false,
+      "createdAt": "2026-10-23T07:46:52.819Z"
+    },
+    {
+      "id": "notif-1792741612819-mem-006",
+      "recipientMemberId": "mem-006",
+      "title": "New Member Application",
+      "message": "Ananya Sharma has registered for Core Team Member in digital-operations and is awaiting HR verification.",
+      "type": "System",
+      "link": "/members",
+      "isRead": false,
+      "createdAt": "2026-10-23T07:46:52.819Z"
     }
   ],
   "settings": {

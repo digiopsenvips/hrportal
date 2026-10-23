@@ -4,6 +4,7 @@ import React, { useState, useMemo } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useData } from '@/context/DataContext';
 import { MemberDetailModal } from '@/components/members/MemberDetailModal';
+import ActiveMemberRegistrationForm from '@/components/members/ActiveMemberRegistrationForm';
 import { Member, RoleType } from '@/types';
 import {
   Users,
@@ -82,18 +83,6 @@ export default function MembersPage() {
   const [csvInput, setCsvInput] = useState('');
   const [csvStatusMessage, setCsvStatusMessage] = useState('');
   const [isImporting, setIsImporting] = useState(false);
-
-  // New Member Form state
-  const [newMemberName, setNewMemberName] = useState('');
-  const [newMemberEmail, setNewMemberEmail] = useState('');
-  const [newMemberEnroll, setNewMemberEnroll] = useState('');
-  const [newMemberJee, setNewMemberJee] = useState('');
-  const [newMemberDept, setNewMemberDept] = useState(departments[0]?.id || 'digital-operations');
-  const [newMemberRole, setNewMemberRole] = useState<RoleType>('general_member');
-  const [newMemberRoleTitle, setNewMemberRoleTitle] = useState('Member');
-  const [newMemberBranch, setNewMemberBranch] = useState('Computer Science & Engineering');
-  const [newMemberSem, setNewMemberSem] = useState(3);
-  const [isSubmittingNew, setIsSubmittingNew] = useState(false);
 
   // Privacy authorization check
   const isAuthorizedSensitive = permissions.canViewSensitiveMemberData;
@@ -376,34 +365,6 @@ export default function MembersPage() {
       setCsvStatusMessage(err.message || 'Import error');
     } finally {
       setIsImporting(false);
-    }
-  };
-
-  // Add Member submit
-  const handleAddMemberSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmittingNew(true);
-    const res = await addMember({
-      name: newMemberName,
-      email: newMemberEmail,
-      collegeEnrollment: newMemberEnroll || 'N/A',
-      jeeRank: newMemberJee ? Number(newMemberJee) : null,
-      primaryDepartmentId: newMemberDept,
-      role: newMemberRole,
-      roleTitle: newMemberRoleTitle,
-      branch: newMemberBranch,
-      currentSemester: newMemberSem,
-    });
-    setIsSubmittingNew(false);
-    if (res.success) {
-      setShowAddModal(false);
-      setNewMemberName('');
-      setNewMemberEmail('');
-      setNewMemberEnroll('');
-      setNewMemberJee('');
-      await refreshAll();
-    } else {
-      alert(res.error || 'Failed to add member');
     }
   };
 
@@ -1084,151 +1045,17 @@ export default function MembersPage() {
         </div>
       )}
 
-      {/* Add Member Modal */}
+      {/* Add Member Modal using TeamHub Active Member Registration Form */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm animate-fadeIn">
-          <div className="w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-3xl border border-[#E3EBE7] bg-white p-6 shadow-xl">
-            <h3 className="text-base font-bold text-[#263832] mb-1">Onboard New Society Member</h3>
-            <p className="text-xs text-[#637d74] mb-4">
-              Add individual record to the active member database with automatic ID assignment.
-            </p>
-
-            <form onSubmit={handleAddMemberSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-semibold text-[#263832]">Full Name *</label>
-                  <input
-                    required
-                    type="text"
-                    value={newMemberName}
-                    onChange={(e) => setNewMemberName(e.target.value)}
-                    placeholder="e.g. Rohini Sen"
-                    className="mt-1 w-full rounded-xl border border-[#E3EBE7] bg-[#F7F9F7] px-3 py-2 text-xs text-[#263832] focus:outline-none focus:border-[#2FC3A5]"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-[#263832]">Email Address *</label>
-                  <input
-                    required
-                    type="email"
-                    value={newMemberEmail}
-                    onChange={(e) => setNewMemberEmail(e.target.value)}
-                    placeholder="e.g. rohini@enactusvips.org"
-                    className="mt-1 w-full rounded-xl border border-[#E3EBE7] bg-[#F7F9F7] px-3 py-2 text-xs text-[#263832] focus:outline-none focus:border-[#2FC3A5]"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-semibold text-[#263832]">College Enrollment Number</label>
-                  <input
-                    type="text"
-                    value={newMemberEnroll}
-                    onChange={(e) => setNewMemberEnroll(e.target.value)}
-                    placeholder="e.g. 04517702025"
-                    className="mt-1 w-full rounded-xl border border-[#E3EBE7] bg-[#F7F9F7] px-3 py-2 text-xs text-[#263832] focus:outline-none focus:border-[#2FC3A5]"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-[#263832]">JEE Rank (Optional)</label>
-                  <input
-                    type="number"
-                    value={newMemberJee}
-                    onChange={(e) => setNewMemberJee(e.target.value)}
-                    placeholder="e.g. 18200"
-                    className="mt-1 w-full rounded-xl border border-[#E3EBE7] bg-[#F7F9F7] px-3 py-2 text-xs text-[#263832] focus:outline-none focus:border-[#2FC3A5]"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-semibold text-[#263832]">Primary Department *</label>
-                  <select
-                    value={newMemberDept}
-                    onChange={(e) => setNewMemberDept(e.target.value)}
-                    className="mt-1 w-full rounded-xl border border-[#E3EBE7] bg-[#F7F9F7] px-3 py-2 text-xs text-[#263832] focus:outline-none focus:border-[#2FC3A5]"
-                  >
-                    {departments.map((d) => (
-                      <option key={d.id} value={d.id}>
-                        {d.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-[#263832]">Hierarchy Role</label>
-                  <select
-                    value={newMemberRole}
-                    onChange={(e) => setNewMemberRole(e.target.value as any)}
-                    className="mt-1 w-full rounded-xl border border-[#E3EBE7] bg-[#F7F9F7] px-3 py-2 text-xs text-[#263832] focus:outline-none focus:border-[#2FC3A5]"
-                  >
-                    <option value="general_member">General Member</option>
-                    <option value="secondary_hr">Secondary HR</option>
-                    <option value="dept_head">Department Head</option>
-                    <option value="hr_head">HR Head</option>
-                    <option value="secretary">Secretary</option>
-                    <option value="vp_1">Vice President</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-semibold text-[#263832]">Designation / Role Title</label>
-                  <input
-                    type="text"
-                    value={newMemberRoleTitle}
-                    onChange={(e) => setNewMemberRoleTitle(e.target.value)}
-                    placeholder="e.g. Operations Executive"
-                    className="mt-1 w-full rounded-xl border border-[#E3EBE7] bg-[#F7F9F7] px-3 py-2 text-xs text-[#263832] focus:outline-none focus:border-[#2FC3A5]"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-[#263832]">Current Semester</label>
-                  <select
-                    value={newMemberSem}
-                    onChange={(e) => setNewMemberSem(Number(e.target.value))}
-                    className="mt-1 w-full rounded-xl border border-[#E3EBE7] bg-[#F7F9F7] px-3 py-2 text-xs text-[#263832] focus:outline-none focus:border-[#2FC3A5]"
-                  >
-                    {[1, 2, 3, 4, 5, 6, 7, 8].map((s) => (
-                      <option key={s} value={s}>
-                        Semester {s}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="text-xs font-semibold text-[#263832]">College Branch</label>
-                <input
-                  type="text"
-                  value={newMemberBranch}
-                  onChange={(e) => setNewMemberBranch(e.target.value)}
-                  placeholder="e.g. Computer Science / BBA / Law"
-                  className="mt-1 w-full rounded-xl border border-[#E3EBE7] bg-[#F7F9F7] px-3 py-2 text-xs text-[#263832] focus:outline-none focus:border-[#2FC3A5]"
-                />
-              </div>
-
-              <div className="mt-5 flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShowAddModal(false)}
-                  className="rounded-xl px-4 py-2 text-xs font-semibold text-[#637d74] hover:bg-[#F7F9F7]"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmittingNew}
-                  className="rounded-xl bg-[#2FC3A5] px-5 py-2 text-xs font-bold text-white hover:bg-[#28af94] transition shadow-sm"
-                >
-                  {isSubmittingNew ? 'Creating...' : 'Onboard Member'}
-                </button>
-              </div>
-            </form>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm animate-fadeIn overflow-y-auto">
+          <div className="w-full max-w-5xl my-6">
+            <ActiveMemberRegistrationForm
+              isAdminMode={true}
+              onCancel={() => setShowAddModal(false)}
+              onSuccess={async () => {
+                await refreshAll();
+              }}
+            />
           </div>
         </div>
       )}
