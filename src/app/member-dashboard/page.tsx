@@ -35,7 +35,7 @@ export default function MemberDashboardPage() {
     refreshAll,
   } = useData();
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'activity' | 'calendar' | 'hours'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'calendar'>('overview');
   const [selectedTaskToUpdate, setSelectedTaskToUpdate] = useState<any | null>(null);
   const [loggedHoursInput, setLoggedHoursInput] = useState<number>(0);
   const [completionNotesInput, setCompletionNotesInput] = useState('');
@@ -172,13 +172,6 @@ export default function MemberDashboardPage() {
               <Edit className="h-4 w-4 text-[#2FC3A5]" />
               <span>{isEditingProfile ? 'Cancel' : 'Edit My Profile'}</span>
             </button>
-            <button
-              onClick={() => setShowCorrectionModal(true)}
-              className="flex items-center gap-2 rounded-xl bg-[#2FC3A5] hover:bg-[#28af94] px-4 py-2.5 text-xs font-bold text-white shadow-sm transition"
-            >
-              <AlertTriangle className="h-4 w-4" />
-              <span>Request Attendance Correction</span>
-            </button>
           </div>
         </div>
 
@@ -224,9 +217,7 @@ export default function MemberDashboardPage() {
       <div className="flex border-b border-[#E3EBE7]">
         {[
           { key: 'overview', label: 'My Overview' },
-          { key: 'activity', label: 'My Activity Timeline' },
           { key: 'calendar', label: 'My Schedule & Deadlines' },
-          { key: 'hours', label: 'My Logged Hours & Progress' },
         ].map((tab) => (
           <button
             key={tab.key}
@@ -246,218 +237,85 @@ export default function MemberDashboardPage() {
       {activeTab === 'overview' && (
         <div className="space-y-6">
           {/* Quick Metrics */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="rounded-2xl border border-[#E3EBE7] bg-white p-4 shadow-sm">
-              <div className="text-[11px] font-semibold text-[#637d74]">My Attendance Rate</div>
-              <div className="text-2xl font-black text-[#2FC3A5] mt-0.5">{memberAttendance.percentage}%</div>
-              <div className="text-[11px] text-[#8a9e96]">
-                {memberAttendance.attended} / {memberAttendance.totalEligible} meetings
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-[#E3EBE7] bg-white p-4 shadow-sm">
-              <div className="text-[11px] font-semibold text-[#637d74]">Tasks Completed</div>
-              <div className="text-2xl font-black text-[#0D5143] mt-0.5">{myCompletedTasks.length}</div>
-              <div className="text-[11px] text-[#8a9e96]">
-                {myPendingTasks.length} currently assigned
-              </div>
-            </div>
-
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
             <div className="rounded-2xl border border-[#E3EBE7] bg-white p-4 shadow-sm">
               <div className="text-[11px] font-semibold text-[#637d74]">Upcoming Meetings</div>
               <div className="text-2xl font-black text-[#263832] mt-0.5">{upcomingMyMeetings.length}</div>
               <div className="text-[11px] text-[#8a9e96]">Department & Society</div>
             </div>
-
-            <div className="rounded-2xl border border-[#E3EBE7] bg-white p-4 shadow-sm">
-              <div className="text-[11px] font-semibold text-[#637d74]">Logged Work Hours</div>
-              <div className="text-2xl font-black text-[#2FC3A5] mt-0.5">{totalLoggedHours}h</div>
-              <div className="text-[11px] text-[#8a9e96]">
-                {totalEstimatedHours}h estimated effort
-              </div>
-            </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* My Active Tasks List */}
+            {/* Upcoming Meetings */}
             <div className="rounded-2xl border border-[#E3EBE7] bg-white p-5 shadow-sm">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-bold text-[#263832] text-sm flex items-center gap-2">
-                  <CheckSquare className="h-4 w-4 text-[#2FC3A5]" />
-                  <span>My Assigned Tasks ({myTasks.length})</span>
-                </h3>
-                <span className="text-xs font-semibold text-[#2FC3A5]">{myPendingTasks.length} pending</span>
-              </div>
+              <h3 className="font-bold text-[#263832] text-sm flex items-center gap-2 mb-3">
+                <Calendar className="h-4 w-4 text-[#2FC3A5]" />
+                <span>My Upcoming Meetings</span>
+              </h3>
 
-              {myTasks.length === 0 ? (
-                <div className="py-8 text-center text-xs text-[#8a9e96]">
-                  You have no tasks assigned right now. Great job!
+              {upcomingMyMeetings.length === 0 ? (
+                <div className="py-6 text-center text-xs text-[#8a9e96]">
+                  No scheduled meetings coming up.
                 </div>
               ) : (
-                <div className="space-y-3">
-                  {myTasks.map((task) => (
+                <div className="space-y-2.5">
+                  {upcomingMyMeetings.map((m) => (
                     <div
-                      key={task.id}
-                      className="rounded-xl border border-[#E3EBE7] bg-[#F7F9F7] p-3.5 hover:border-[#2FC3A5] transition"
+                      key={m.id}
+                      className="rounded-xl border border-[#E3EBE7] bg-[#F7F9F7] p-3 flex items-center justify-between"
                     >
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <div className="text-xs font-bold text-[#263832]">{task.title}</div>
-                          <p className="text-[11px] text-[#637d74] mt-0.5">{task.description}</p>
+                      <div>
+                        <div className="text-xs font-semibold text-[#263832]">{m.title}</div>
+                        <div className="text-[10px] text-[#637d74]">
+                          {m.date} at {m.startTime} • {m.mode} ({m.location})
                         </div>
-                        <span
-                          className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold shrink-0 ${
-                            task.status === 'Completed'
-                              ? 'bg-[#E7F3D7] text-[#0D5143]'
-                              : task.status === 'In Progress'
-                              ? 'bg-blue-50 text-blue-700'
-                              : 'bg-amber-50 text-amber-700'
-                          }`}
+                      </div>
+                      {m.meetingLink && (
+                        <a
+                          href={m.meetingLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="rounded-lg bg-[#DDF7EF] border border-[#2FC3A5] px-2.5 py-1 text-[10px] font-bold text-[#0D5143] hover:bg-[#2FC3A5] hover:text-white transition"
                         >
-                          {task.status}
-                        </span>
-                      </div>
-
-                      <div className="mt-3 flex items-center justify-between text-[11px] text-[#637d74] border-t border-[#E3EBE7] pt-2">
-                        <span>Deadline: <span className="text-[#263832] font-semibold">{task.deadline}</span></span>
-                        <span>Logged: <span className="text-[#0D5143] font-bold">{task.actualEffortHours} hrs</span></span>
-                        {task.status !== 'Completed' && (
-                          <button
-                            onClick={() => {
-                              setSelectedTaskToUpdate(task);
-                              setLoggedHoursInput(task.actualEffortHours || 2);
-                            }}
-                            className="rounded-lg bg-white border border-[#E3EBE7] px-2.5 py-1 text-[10px] font-semibold text-[#263832] hover:border-[#2FC3A5] hover:text-[#2FC3A5] transition"
-                          >
-                            Update Progress
-                          </button>
-                        )}
-                      </div>
+                          Join Link
+                        </a>
+                      )}
                     </div>
                   ))}
                 </div>
               )}
             </div>
 
-            {/* Upcoming Meetings & Published MOMs */}
-            <div className="space-y-6">
-              {/* Upcoming Meetings */}
-              <div className="rounded-2xl border border-[#E3EBE7] bg-white p-5 shadow-sm">
-                <h3 className="font-bold text-[#263832] text-sm flex items-center gap-2 mb-3">
-                  <Calendar className="h-4 w-4 text-[#2FC3A5]" />
-                  <span>My Upcoming Meetings</span>
-                </h3>
-
-                {upcomingMyMeetings.length === 0 ? (
-                  <div className="py-6 text-center text-xs text-[#8a9e96]">
-                    No scheduled meetings coming up.
-                  </div>
-                ) : (
-                  <div className="space-y-2.5">
-                    {upcomingMyMeetings.map((m) => (
-                      <div
-                        key={m.id}
-                        className="rounded-xl border border-[#E3EBE7] bg-[#F7F9F7] p-3 flex items-center justify-between"
-                      >
-                        <div>
-                          <div className="text-xs font-semibold text-[#263832]">{m.title}</div>
-                          <div className="text-[10px] text-[#637d74]">
-                            {m.date} at {m.startTime} • {m.mode} ({m.location})
-                          </div>
-                        </div>
-                        {m.meetingLink && (
-                          <a
-                            href={m.meetingLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="rounded-lg bg-[#DDF7EF] border border-[#2FC3A5] px-2.5 py-1 text-[10px] font-bold text-[#0D5143] hover:bg-[#2FC3A5] hover:text-white transition"
-                          >
-                            Join Link
-                          </a>
-                        )}
+            {/* Recent Society MOMs */}
+            <div className="rounded-2xl border border-[#E3EBE7] bg-white p-5 shadow-sm">
+              <h3 className="font-bold text-[#263832] text-sm flex items-center gap-2 mb-3">
+                <FileText className="h-4 w-4 text-[#2FC3A5]" />
+                <span>Published Meeting Minutes (MoM)</span>
+              </h3>
+              <div className="space-y-2">
+                {recentPublishedMoms.map((mom) => (
+                  <div
+                    key={mom.id}
+                    className="rounded-xl border border-[#E3EBE7] bg-[#F7F9F7] p-2.5 flex items-center justify-between text-xs"
+                  >
+                    <div>
+                      <div className="font-semibold text-[#263832]">{mom.title}</div>
+                      <div className="text-[10px] text-[#8a9e96]">
+                        {mom.meetingDate} • Dept: {mom.departmentId}
                       </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Recent Society MOMs */}
-              <div className="rounded-2xl border border-[#E3EBE7] bg-white p-5 shadow-sm">
-                <h3 className="font-bold text-[#263832] text-sm flex items-center gap-2 mb-3">
-                  <FileText className="h-4 w-4 text-[#2FC3A5]" />
-                  <span>Published Meeting Minutes (MoM)</span>
-                </h3>
-                <div className="space-y-2">
-                  {recentPublishedMoms.map((mom) => (
-                    <div
-                      key={mom.id}
-                      className="rounded-xl border border-[#E3EBE7] bg-[#F7F9F7] p-2.5 flex items-center justify-between text-xs"
-                    >
-                      <div>
-                        <div className="font-semibold text-[#263832]">{mom.title}</div>
-                        <div className="text-[10px] text-[#8a9e96]">
-                          {mom.meetingDate} • Dept: {mom.departmentId}
-                        </div>
-                      </div>
-                      <span className="rounded-full bg-[#E7F3D7] px-2.5 py-0.5 text-[9px] font-bold text-[#0D5143]">
-                        Published
-                      </span>
                     </div>
-                  ))}
-                </div>
+                    <span className="rounded-full bg-[#E7F3D7] px-2.5 py-0.5 text-[9px] font-bold text-[#0D5143]">
+                      Published
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* TAB 2: ACTIVITY TIMELINE */}
-      {activeTab === 'activity' && (
-        <div className="rounded-2xl border border-[#E3EBE7] bg-white p-6 shadow-sm">
-          <h3 className="text-sm font-bold text-[#263832] uppercase tracking-wider mb-6">
-            Chronological Activity & Participation History
-          </h3>
-          <div className="relative border-l border-[#E3EBE7] pl-6 space-y-6">
-            {myAttendanceRecords.map((att) => {
-              const meet = meetings.find((m) => m.id === att.meetingId);
-              return (
-                <div key={att.id} className="relative">
-                  <div className="absolute -left-[31px] top-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#E7F3D7] text-[#0D5143] ring-4 ring-white">
-                    <CheckCircle2 className="h-3 w-3 text-[#2FC3A5]" />
-                  </div>
-                  <div className="text-xs font-bold text-[#263832]">
-                    Attendance Recorded: {att.status}
-                  </div>
-                  <div className="text-[11px] text-[#637d74]">
-                    Meeting: {meet ? meet.title : 'Departmental Sync'} on {meet?.date}
-                  </div>
-                  {att.notes && (
-                    <div className="mt-1 text-[10px] text-[#8a9e96] italic">
-                      Note: {att.notes}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-
-            {myTasks.map((t) => (
-              <div key={t.id} className="relative">
-                <div className="absolute -left-[31px] top-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#DDF7EF] text-[#2FC3A5] ring-4 ring-white">
-                  <Clock className="h-3 w-3" />
-                </div>
-                <div className="text-xs font-bold text-[#263832]">
-                  Task Assignment: {t.title}
-                </div>
-                <div className="text-[11px] text-[#637d74]">
-                  Category: {t.category} • Status: {t.status} • {t.actualEffortHours} hrs logged
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* TAB 3: CALENDAR */}
+      {/* TAB 2: CALENDAR */}
       {activeTab === 'calendar' && (
         <div className="rounded-2xl border border-[#E3EBE7] bg-white p-6 shadow-sm">
           <h3 className="text-sm font-bold text-[#263832] uppercase tracking-wider mb-4">
@@ -479,35 +337,6 @@ export default function MemberDashboardPage() {
                 </div>
               </div>
             ))}
-          </div>
-        </div>
-      )}
-
-      {/* TAB 4: HOURS & PROGRESS */}
-      {activeTab === 'hours' && (
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="rounded-2xl border border-[#E3EBE7] bg-white p-4 shadow-sm">
-              <div className="text-[11px] font-semibold text-[#637d74]">Actual Logged Work Hours</div>
-              <div className="text-2xl font-black text-[#2FC3A5] mt-0.5">{totalLoggedHours}h</div>
-              <div className="text-[10px] text-[#8a9e96] mt-1">
-                Verified work across all assigned responsibilities
-              </div>
-            </div>
-            <div className="rounded-2xl border border-[#E3EBE7] bg-white p-4 shadow-sm">
-              <div className="text-[11px] font-semibold text-[#637d74]">Completed Work Effort</div>
-              <div className="text-2xl font-black text-[#0D5143] mt-0.5">{completedWorkHours}h</div>
-              <div className="text-[10px] text-[#8a9e96] mt-1">
-                {taskCompletionRate}% task completion efficiency
-              </div>
-            </div>
-            <div className="rounded-2xl border border-[#E3EBE7] bg-white p-4 shadow-sm">
-              <div className="text-[11px] font-semibold text-[#637d74]">Estimated Effort Target</div>
-              <div className="text-2xl font-black text-[#263832] mt-0.5">{totalEstimatedHours}h</div>
-              <div className="text-[10px] text-[#8a9e96] mt-1">
-                Scheduled meeting time is excluded from work hours
-              </div>
-            </div>
           </div>
         </div>
       )}
@@ -564,75 +393,6 @@ export default function MemberDashboardPage() {
                 Submit as Completed
               </button>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Attendance Correction Modal */}
-      {showCorrectionModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm animate-fadeIn">
-          <div className="w-full max-w-md rounded-3xl border border-[#E3EBE7] bg-white p-6 shadow-xl">
-            <h3 className="text-sm font-bold text-[#263832] mb-1">
-              Request Attendance Correction
-            </h3>
-            <p className="text-xs text-[#637d74] mb-4">
-              If an official attendance record was marked incorrectly or you had prior authorization, submit a correction ticket for review by HR.
-            </p>
-
-            <form onSubmit={handleCorrectionSubmit} className="space-y-3">
-              <div>
-                <label className="text-xs font-semibold text-[#263832]">Select Meeting Record</label>
-                <select
-                  required
-                  value={correctionAttendanceId}
-                  onChange={(e) => {
-                    setCorrectionAttendanceId(e.target.value);
-                    const att = myAttendanceRecords.find((a) => a.id === e.target.value);
-                    if (att) setCorrectionMeetingId(att.meetingId);
-                  }}
-                  className="mt-1 w-full rounded-xl border border-[#E3EBE7] bg-[#F7F9F7] px-3 py-2 text-xs text-[#263832] focus:outline-none focus:border-[#2FC3A5]"
-                >
-                  <option value="">-- Choose past meeting attendance --</option>
-                  {myAttendanceRecords.map((att) => {
-                    const m = meetings.find((meet) => meet.id === att.meetingId);
-                    return (
-                      <option key={att.id} value={att.id}>
-                        {m ? m.title : att.meetingId} ({att.status})
-                      </option>
-                    );
-                  })}
-                </select>
-              </div>
-
-              <div>
-                <label className="text-xs font-semibold text-[#263832]">Reason for Request</label>
-                <textarea
-                  required
-                  rows={3}
-                  value={correctionReason}
-                  onChange={(e) => setCorrectionReason(e.target.value)}
-                  placeholder="Explain why you were late or absent (e.g. University exam viva, pre-informed department head)..."
-                  className="mt-1 w-full rounded-xl border border-[#E3EBE7] bg-[#F7F9F7] px-3 py-2 text-xs text-[#263832] focus:outline-none focus:border-[#2FC3A5]"
-                />
-              </div>
-
-              <div className="mt-5 flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShowCorrectionModal(false)}
-                  className="rounded-xl px-4 py-2 text-xs font-semibold text-[#637d74] hover:bg-[#F7F9F7]"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="rounded-xl bg-[#2FC3A5] px-4 py-2 text-xs font-bold text-white hover:bg-[#28af94] transition shadow-sm"
-                >
-                  {isSubmitting ? 'Submitting...' : 'Submit Correction Ticket'}
-                </button>
-              </div>
-            </form>
           </div>
         </div>
       )}

@@ -197,3 +197,167 @@ export function computeHRLeaderboard(
 
   return entries;
 }
+
+/**
+ * Parses any supported time string (ISO string, 24h 'HH:mm', 12h 'h:mm A')
+ * into minutes from the start of the day.
+ */
+function parseTimeToMinutesOfDay(timeStr: string): number | null {
+  if (!timeStr || typeof timeStr !== 'string') return null;
+  const trimmed = timeStr.trim();
+  if (!trimmed) return null;
+
+  // Check ISO format: e.g. 2026-10-19T16:08:00.000Z
+  if (trimmed.includes('T')) {
+    const d = new Date(trimmed);
+    if (!isNaN(d.getTime())) {
+      return d.getHours() * 60 + d.getMinutes();
+    }
+  }
+
+  // Check 12-hour AM/PM format: e.g. "4:08 PM" or "04:08 pm"
+  const ampmMatch = trimmed.match(/^(\d{1,2}):(\d{2})(?::\d{2})?\s*(AM|PM)$/i);
+  if (ampmMatch) {
+    let hours = parseInt(ampmMatch[1], 10);
+    const minutes = parseInt(ampmMatch[2], 10);
+    const period = ampmMatch[3].toUpperCase();
+    if (period === 'PM' && hours < 12) hours += 12;
+    if (period === 'AM' && hours === 12) hours = 0;
+    return hours * 60 + minutes;
+  }
+
+  // Check 24-hour format: e.g. "16:08" or "16:08:00"
+  const match24 = trimmed.match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);
+  if (match24) {
+    const hours = parseInt(match24[1], 10);
+    const minutes = parseInt(match24[2], 10);
+    return hours * 60 + minutes;
+  }
+
+  return null;
+}
+
+/**
+ * Format minutes of day or raw string into user-friendly time string (e.g. "4:08 PM" or "16:08")
+ */
+function formatTimeString(rawTime?: string): string {
+  if (!rawTime || typeof rawTime !== 'string') return 'Not recorded';
+  const trimmed = rawTime.trim();
+  if (!trimmed) return 'Not recorded';
+
+  // If ISO string
+  if (trimmed.includes('T')) {
+    const d = new Date(trimmed);
+    if (!isNaN(d.getTime())) {
+      return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
+    }
+  }
+
+  // If already AM/PM or HH:mm, return as is
+  return trimmed;
+}
+
+export interface AttendanceDurationInfo {
+  durationMinutes: number | null;
+  formattedDuration: string;
+  actualJoinTime: string;
+  actualLeaveTime: string;
+}
+
+/**
+ * Calculates the exact attended duration for a member's attendance record
+ * using actual recorded join and leave times.
+ * Handles multiple sessions without double-counting overlapping intervals.
+ * Displays "Duration unavailable" if join/leave times are missing.
+ */
+export function calculateAttendanceDuration(
+  record?: {
+    joinTime?: string;
+    leaveTime?: string;
+    durationMinutes?: number;
+    sessions?: { joinTime: string; leaveTime: string }[];
+  } | null
+): AttendanceDurationInfo {
+  if (!record) {
+    return {
+      durationMinutes: null,
+      formattedDuration: 'Duration unavailable',
+      actualJoinTime: 'Not recorded',
+      actualLeaveTime: 'Not recorded',
+    };
+  }
+
+  // Case 1: Multiple attendance sessions recorded
+  if (Array.isArray(record.sessions) && record.sessions.length > 0) {
+    const intervals: [number, number][] = [];
+    for (const s of record.sessions) {
+      const start = parseTimeToMinutesOfDay(s.joinTime);
+      const end = parseTimeToMinutesOfDay(s.leaveTime);
+      if (start !== null && end !== null && end >= start) {
+        intervals.push([start, end]);
+      }
+    }
+
+    if (intervals.length > 0) {
+      // Sort intervals by start time
+      intervals.sort((a, b) => a[0] - b[0]);
+
+      // Merge overlapping intervals
+      const merged: [number, number][] = [intervals[0]];
+      for (let i = 1; i < intervals.length; i++) {
+        const prev = merged[merged.length - 1];
+        const curr = intervals[i];
+        if (curr[0] <= prev[1]) {
+          prev[1] = Math.max(prev[1], curr[1]);
+        } else {
+          merged.push(curr);
+        }
+      }
+
+      // Sum merged minutes
+      const totalMinutes = merged.reduce((sum, [s, e]) => sum + (e - s), 0);
+      const firstJoin = record.sessions[0].joinTime;
+      const lastLeave = record.sessions[record.sessions.length - 1].leaveTime;
+
+      return {
+        durationMinutes: totalMinutes,
+        formattedDuration: `${totalMinutes} minute${totalMinutes === 1 ? '' : 's'}`,
+        actualJoinTime: formatTimeString(firstJoin),
+        actualLeaveTime: formatTimeString(lastLeave),
+      };
+    }
+  }
+
+  // Case 2: Single joinTime and leaveTime
+  const startMins = parseTimeToMinutesOfDay(record.joinTime || '');
+  const endMins = parseTimeToMinutesOfDay(record.leaveTime || '');
+
+  if (startMins !== null && endMins !== null) {
+    // If leave time is later than or equal to join time
+    const diff = Math.max(0, endMins - startMins);
+    return {
+      durationMinutes: diff,
+      formattedDuration: `${diff} minute${diff === 1 ? '' : 's'}`,
+      actualJoinTime: formatTimeString(record.joinTime),
+      actualLeaveTime: formatTimeString(record.leaveTime),
+    };
+  }
+
+  // Case 3: Explicit durationMinutes present but specific join/leave not parsed
+  if (typeof record.durationMinutes === 'number' && record.durationMinutes >= 0) {
+    return {
+      durationMinutes: record.durationMinutes,
+      formattedDuration: `${record.durationMinutes} minute${record.durationMinutes === 1 ? '' : 's'}`,
+      actualJoinTime: formatTimeString(record.joinTime),
+      actualLeaveTime: formatTimeString(record.leaveTime),
+    };
+  }
+
+  // Case 4: Join or leave record unavailable
+  return {
+    durationMinutes: null,
+    formattedDuration: 'Duration unavailable',
+    actualJoinTime: formatTimeString(record.joinTime),
+    actualLeaveTime: formatTimeString(record.leaveTime),
+  };
+}

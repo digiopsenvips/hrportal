@@ -3,10 +3,13 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -H 0.0.0.0",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -H 0.0.0.0",
     "lint": "next lint"
+  },
+  "engines": {
+    "node": ">=18.18.0"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",

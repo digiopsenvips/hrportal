@@ -35,13 +35,8 @@ export function Navbar({ onToggleSidebar, onOpenSearch }: NavbarProps) {
   const unreadCount = userNotifications.filter((n) => !n.isRead).length;
 
   const keyRoles = [
-    { title: 'Level 1: President', role: 'president' },
-    { title: 'Level 2: VP 1 (Operations)', role: 'vp_1' },
-    { title: 'Level 3: General Secretary', role: 'secretary' },
-    { title: 'Level 4: HR Department Head', role: 'hr_head' },
-    { title: 'Level 5: Digital Operations Head', role: 'dept_head' },
-    { title: 'Level 6: Secondary HR (Digital)', role: 'secondary_hr' },
-    { title: 'Level 7: General Member', role: 'general_member' },
+    { title: 'Core Members', role: 'core' },
+    { title: 'Developers', role: 'developer' },
   ];
 
   return (
@@ -132,8 +127,14 @@ export function Navbar({ onToggleSidebar, onOpenSearch }: NavbarProps) {
               </div>
               <div className="max-h-64 space-y-1 overflow-y-auto py-2">
                 {keyRoles.map((kr) => {
-                  const targetMember = allMembers.find((m) => m.role === kr.role);
-                  const isCurrent = currentUser?.role === kr.role;
+                  const targetMember =
+                    kr.role === 'developer'
+                      ? allMembers.find((m) => m.role === 'developer')
+                      : (allMembers.find((m) => m.role === 'president') || allMembers.find((m) => m.role !== 'developer'));
+                  const isCurrent =
+                    kr.role === 'developer'
+                      ? currentUser?.role === 'developer'
+                      : currentUser?.role !== 'developer';
                   if (!targetMember) return null;
                   return (
                     <button

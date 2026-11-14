@@ -37,6 +37,8 @@ export async function POST(req: NextRequest) {
             ...old,
             status: item.status as AttendanceStatus,
             notes: item.notes || old.notes,
+            durationMinutes: item.durationMinutes !== undefined ? item.durationMinutes : old.durationMinutes,
+            recordingSource: item.recordingSource || old.recordingSource,
             auditTrail: [
               ...old.auditTrail,
               {
@@ -104,6 +106,8 @@ export async function POST(req: NextRequest) {
         ...old,
         status,
         notes: notes || old.notes,
+        durationMinutes: body.durationMinutes !== undefined ? body.durationMinutes : old.durationMinutes,
+        recordingSource: body.recordingSource || old.recordingSource,
         auditTrail: [
           ...old.auditTrail,
           {
@@ -129,6 +133,8 @@ export async function POST(req: NextRequest) {
       markedById,
       markedAt: new Date().toISOString(),
       notes: notes || '',
+      durationMinutes: body.durationMinutes,
+      recordingSource: body.recordingSource || 'manual',
       auditTrail: [],
     };
 

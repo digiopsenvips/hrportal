@@ -128,22 +128,13 @@ export default function EventsAnnouncementsPage() {
 
         <div className="flex items-center gap-2">
           {permissions.canPostAnnouncements && (
-            <>
-              <button
-                onClick={() => setShowNoticeModal(true)}
-                className="flex items-center gap-2 rounded-xl border border-[#E3EBE7] bg-white px-3.5 py-2.5 text-xs font-semibold text-[#263832] hover:bg-[#DDF7EF] hover:border-[#2FC3A5] transition shadow-sm"
-              >
-                <Plus className="h-4 w-4 text-[#2FC3A5]" />
-                <span>Post Notice</span>
-              </button>
-              <button
-                onClick={() => setShowEventModal(true)}
-                className="flex items-center gap-2 rounded-xl bg-[#2FC3A5] hover:bg-[#28af94] px-4 py-2.5 text-xs font-bold text-white shadow-sm transition"
-              >
-                <Plus className="h-4 w-4" />
-                <span>Schedule Event</span>
-              </button>
-            </>
+            <button
+              onClick={() => setShowNoticeModal(true)}
+              className="flex items-center gap-2 rounded-xl bg-[#2FC3A5] hover:bg-[#28af94] px-4 py-2.5 text-xs font-bold text-white shadow-sm transition"
+            >
+              <Plus className="h-4 w-4" />
+              <span>Post Notice</span>
+            </button>
           )}
         </div>
       </div>

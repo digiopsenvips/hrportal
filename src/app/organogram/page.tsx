@@ -106,6 +106,7 @@ export default function OrganogramPage() {
         <MemberDetailModal
           member={selectedMember}
           onClose={() => setSelectedMember(null)}
+          hideTasksAndAttendance={true}
         />
       )}
     </div>

@@ -7,7 +7,7 @@ export default function AttendanceRedirect() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace('/moms?tab=attendance');
+    router.replace('/moms');
   }, [router]);
 
   return (

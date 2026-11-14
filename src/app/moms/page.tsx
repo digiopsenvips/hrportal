@@ -13,6 +13,20 @@ import {
   MOMEditRequest,
   Task,
 } from '@/types';
+
+interface FormMemberAttendance {
+  status: 'Present' | 'Late' | 'Absent';
+  minutesAttended: number | '';
+}
+
+const calculateMinutesDiff = (start: string, end: string): number => {
+  if (!start || !end) return 60;
+  const [sh, sm] = start.split(':').map(Number);
+  const [eh, em] = end.split(':').map(Number);
+  if (isNaN(sh) || isNaN(sm) || isNaN(eh) || isNaN(em)) return 60;
+  const diff = (eh * 60 + em) - (sh * 60 + sm);
+  return diff > 0 ? diff : 60;
+};
 import {
   FileText,
   Plus,
@@ -64,11 +78,6 @@ export default function MOMsAndAttendancePage() {
     refreshAll,
   } = useData();
 
-  // Primary Tab State
-  const [activeTab, setActiveTab] = useState<'moms' | 'attendance' | 'reports' | 'approvals'>(
-    initialTab === 'attendance' ? 'attendance' : initialTab === 'reports' ? 'reports' : 'moms'
-  );
-
   // Search & Filter
   const [searchQuery, setSearchQuery] = useState('');
   const [filterDept, setFilterDept] = useState('ALL');
@@ -94,6 +103,7 @@ export default function MOMsAndAttendancePage() {
   const [formDate, setFormDate] = useState(new Date().toISOString().slice(0, 10));
   const [formStartTime, setFormStartTime] = useState('15:00');
   const [formEndTime, setFormEndTime] = useState('16:30');
+  const [formDuration, setFormDuration] = useState<number>(90);
   const [formType, setFormType] = useState<MeetingMode>('Online');
   const [formLocation, setFormLocation] = useState('Google Meet');
   const [formMeetingLink, setFormMeetingLink] = useState('https://meet.google.com/enactus-sync');
@@ -111,12 +121,9 @@ export default function MOMsAndAttendancePage() {
   const [formIsEditing, setFormIsEditing] = useState(false);
   const [editingMomId, setEditingMomId] = useState<string | null>(null);
 
-  // Attendance Interface State
-  const [attendanceMeetingId, setAttendanceMeetingId] = useState<string>(meetings[0]?.id || '');
-  const [attendanceMemberStates, setAttendanceMemberStates] = useState<Record<string, AttendanceStatus>>({});
-  const [isSavingAttendance, setIsSavingAttendance] = useState(false);
-  const [attendanceFilterVertical, setAttendanceFilterVertical] = useState('ALL');
-  const [attendanceSource, setAttendanceSource] = useState<'manual' | 'platform' | 'csv'>('manual');
+  // Integrated Member Attendance State for Create/Edit MoM
+  const [formMemberAttendance, setFormMemberAttendance] = useState<Record<string, FormMemberAttendance>>({});
+  const [attendanceSearchTerm, setAttendanceSearchTerm] = useState('');
 
   // Load Edit Requests
   useEffect(() => {
@@ -136,113 +143,166 @@ export default function MOMsAndAttendancePage() {
     loadRequests();
   }, []);
 
-  // When meeting changes in Attendance Interface, initialize members as 'Present' by default
-  const selectedMeeting = useMemo(() => {
-    return meetings.find((m) => m.id === attendanceMeetingId) || meetings[0];
-  }, [meetings, attendanceMeetingId]);
+  // Duration change handler: auto-updates Present members and adjusts Late members if needed
+  const handleDurationChange = (newDuration: number) => {
+    const validDuration = Math.max(1, newDuration);
+    setFormDuration(validDuration);
+    setFormMemberAttendance((prev) => {
+      const updated: Record<string, FormMemberAttendance> = { ...prev };
+      for (const mId of Object.keys(updated)) {
+        const item = updated[mId];
+        if (item.status === 'Present') {
+          updated[mId] = {
+            status: 'Present',
+            minutesAttended: validDuration,
+          };
+        } else if (item.status === 'Absent') {
+          updated[mId] = {
+            status: 'Absent',
+            minutesAttended: 0,
+          };
+        } else if (item.status === 'Late') {
+          const currentMins = typeof item.minutesAttended === 'number' ? item.minutesAttended : 0;
+          if (currentMins > validDuration) {
+            updated[mId] = {
+              status: 'Late',
+              minutesAttended: validDuration,
+            };
+          }
+        }
+      }
+      return updated;
+    });
+  };
 
-  const departmentMembers = useMemo(() => {
-    if (!selectedMeeting) return members;
-    if (selectedMeeting.departmentId === 'ALL') {
-      return members.filter((m) => m.membershipStatus === 'ACTIVE' && m.approvalStatus === 'APPROVED');
+  // Start & End time changes calculate duration automatically
+  const handleStartTimeChange = (newStart: string) => {
+    setFormStartTime(newStart);
+    if (newStart && formEndTime) {
+      const diff = calculateMinutesDiff(newStart, formEndTime);
+      handleDurationChange(diff);
     }
+  };
+
+  const handleEndTimeChange = (newEnd: string) => {
+    setFormEndTime(newEnd);
+    if (formStartTime && newEnd) {
+      const diff = calculateMinutesDiff(formStartTime, newEnd);
+      handleDurationChange(diff);
+    }
+  };
+
+  // Status selection logic:
+  // - Present: assigns full meeting duration
+  // - Late: manual numeric input (0 to meeting duration)
+  // - Absent: assigns 0 minutes
+  // - Switch from Late to Present: replaces manual value with full duration
+  const handleMemberStatusChange = (memberId: string, newStatus: 'Present' | 'Late' | 'Absent') => {
+    setFormMemberAttendance((prev) => {
+      const current = prev[memberId];
+      if (newStatus === 'Present') {
+        return {
+          ...prev,
+          [memberId]: { status: 'Present', minutesAttended: formDuration },
+        };
+      } else if (newStatus === 'Absent') {
+        return {
+          ...prev,
+          [memberId]: { status: 'Absent', minutesAttended: 0 },
+        };
+      } else {
+        return {
+          ...prev,
+          [memberId]: {
+            status: 'Late',
+            minutesAttended:
+              current?.status === 'Late' && typeof current.minutesAttended === 'number'
+                ? Math.min(current.minutesAttended, formDuration)
+                : '',
+          },
+        };
+      }
+    });
+  };
+
+  const handleLateMinutesChange = (memberId: string, val: string) => {
+    if (val === '') {
+      setFormMemberAttendance((prev) => ({
+        ...prev,
+        [memberId]: { status: 'Late', minutesAttended: '' },
+      }));
+      return;
+    }
+    const num = parseInt(val, 10);
+    if (isNaN(num)) return;
+    const clamped = Math.max(0, Math.min(num, formDuration));
+    setFormMemberAttendance((prev) => ({
+      ...prev,
+      [memberId]: { status: 'Late', minutesAttended: clamped },
+    }));
+  };
+
+  const filteredFormMembers = useMemo(() => {
+    if (!attendanceSearchTerm.trim()) return members;
+    const term = attendanceSearchTerm.toLowerCase();
     return members.filter(
       (m) =>
-        (m.primaryDepartmentId === selectedMeeting.departmentId ||
-          m.assignedDepartmentId === selectedMeeting.departmentId) &&
-        m.membershipStatus === 'ACTIVE' &&
-        m.approvalStatus === 'APPROVED'
+        m.name.toLowerCase().includes(term) ||
+        m.roleTitle.toLowerCase().includes(term) ||
+        departments.find((d) => d.id === (m.primaryDepartmentId || m.assignedDepartmentId))?.name.toLowerCase().includes(term)
     );
-  }, [members, selectedMeeting]);
+  }, [members, departments, attendanceSearchTerm]);
 
-  useEffect(() => {
-    if (!selectedMeeting) return;
-    const meetingExistingAtt = attendance.filter((a) => a.meetingId === selectedMeeting.id);
-    const initialMap: Record<string, AttendanceStatus> = {};
-
-    departmentMembers.forEach((mem) => {
-      const match = meetingExistingAtt.find((a) => a.memberId === mem.id);
-      // Default to Present per PDF requirement!
-      initialMap[mem.id] = match ? match.status : 'Present';
+  const formAttendanceCounts = useMemo(() => {
+    let present = 0;
+    let late = 0;
+    let absent = 0;
+    members.forEach((m) => {
+      const att = formMemberAttendance[m.id];
+      const st = att ? att.status : 'Present';
+      if (st === 'Present') present++;
+      else if (st === 'Late') late++;
+      else if (st === 'Absent') absent++;
     });
+    return { present, late, absent, total: members.length };
+  }, [members, formMemberAttendance]);
 
-    setAttendanceMemberStates(initialMap);
-  }, [selectedMeeting, departmentMembers, attendance]);
+  // Attendance Records for the Selected MOM in Detail Modal
+  const selectedMomCalculatedDuration = useMemo(() => {
+    if (!selectedMOM) return 60;
+    return calculateMinutesDiff(selectedMOM.startTime, selectedMOM.endTime);
+  }, [selectedMOM]);
 
-  // Member-card tap interaction: Present -> Absent -> Late -> Present
-  const handleToggleAttendanceCard = (memberId: string) => {
-    setAttendanceMemberStates((prev) => {
-      const current = prev[memberId] || 'Present';
-      let next: AttendanceStatus = 'Absent';
-      if (current === 'Present') next = 'Absent';
-      else if (current === 'Absent') next = 'Late';
-      else if (current === 'Late') next = 'Excused';
-      else next = 'Present';
-
+  const selectedMomAttendanceRecords = useMemo(() => {
+    if (!selectedMOM) return [];
+    return members.map((member) => {
+      const rec = attendance.find(
+        (a) => a.meetingId === selectedMOM.meetingId && a.memberId === member.id
+      );
+      if (rec) {
+        const st = (rec.status === 'Present' || rec.status === 'Late' || rec.status === 'Absent')
+          ? rec.status
+          : 'Present';
+        const mins = rec.durationMinutes !== undefined
+          ? rec.durationMinutes
+          : (st === 'Absent' ? 0 : selectedMomCalculatedDuration);
+        return {
+          member,
+          status: st,
+          duration: mins,
+        };
+      }
+      const isAbsent = selectedMOM.absenteeIds?.includes(member.id);
+      const isPresent = selectedMOM.attendeeIds?.includes(member.id);
+      const st = isAbsent ? 'Absent' : (isPresent ? 'Present' : 'Absent');
+      const mins = st === 'Absent' ? 0 : selectedMomCalculatedDuration;
       return {
-        ...prev,
-        [memberId]: next,
+        member,
+        status: st,
+        duration: mins,
       };
     });
-  };
-
-  // Live Attendance Counts
-  const attendanceCounts = useMemo(() => {
-    const total = departmentMembers.length;
-    let present = 0;
-    let absent = 0;
-    let late = 0;
-    let excused = 0;
-
-    departmentMembers.forEach((m) => {
-      const st = attendanceMemberStates[m.id] || 'Present';
-      if (st === 'Present') present++;
-      else if (st === 'Absent') absent++;
-      else if (st === 'Late') late++;
-      else if (st === 'Excused') excused++;
-    });
-
-    const percent = total > 0 ? Math.round(((present + late) / total) * 100) : 0;
-    return { total, present, absent, late, excused, percent };
-  }, [departmentMembers, attendanceMemberStates]);
-
-  // Save Attendance to Server & Audit
-  const handleSaveAttendance = async () => {
-    if (!currentUser || !selectedMeeting) return;
-    setIsSavingAttendance(true);
-
-    const records = departmentMembers.map((m) => ({
-      memberId: m.id,
-      status: attendanceMemberStates[m.id] || 'Present',
-      recordingSource: attendanceSource,
-      notes: `${attendanceSource.toUpperCase()} entry marked on ${new Date().toLocaleDateString()}`,
-    }));
-
-    try {
-      const res = await fetch('/api/attendance', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          meetingId: selectedMeeting.id,
-          departmentId: selectedMeeting.departmentId,
-          markedById: currentUser.id,
-          records,
-          reason: 'Meeting attendance confirmed via member-card interface',
-        }),
-      });
-
-      if (res.ok) {
-        await refreshAll();
-        alert(`Attendance recorded for ${records.length} member(s)!`);
-      } else {
-        alert('Failed to save attendance record.');
-      }
-    } catch (e: any) {
-      alert(e.message || 'Error saving attendance');
-    } finally {
-      setIsSavingAttendance(false);
-    }
-  };
+  }, [selectedMOM, members, attendance, selectedMomCalculatedDuration]);
 
   // Carry forward unfinished tasks from previous MoM
   const handleCarryForwardTasks = () => {
@@ -283,7 +343,6 @@ export default function MOMsAndAttendancePage() {
       if (mom.publicationStatus === 'Confidential' && !permissions.canViewConfidentialMOMs) {
         return false;
       }
-      // General members view only published MOMs
       if (mom.publicationStatus === 'Draft' && permissions.isGeneralMember) {
         return false;
       }
@@ -304,6 +363,7 @@ export default function MOMsAndAttendancePage() {
   const handleOpenCreateModal = () => {
     setFormIsEditing(false);
     setEditingMomId(null);
+    setFormMeetingId(`meeting-${Date.now()}`);
     setFormTitle('');
     setFormAgenda('');
     setFormObjectives('');
@@ -313,6 +373,14 @@ export default function MOMsAndAttendancePage() {
       { description: '', assigneeId: members[0]?.id || '', deadline: new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10), status: 'Not Started' },
     ]);
     setFormPublicationStatus('Draft');
+    const initialDuration = calculateMinutesDiff(formStartTime, formEndTime);
+    setFormDuration(initialDuration);
+    const initialAtt: Record<string, FormMemberAttendance> = {};
+    members.forEach((m) => {
+      initialAtt[m.id] = { status: 'Present', minutesAttended: initialDuration };
+    });
+    setFormMemberAttendance(initialAtt);
+    setAttendanceSearchTerm('');
     setShowCreateModal(true);
   };
 
@@ -326,22 +394,82 @@ export default function MOMsAndAttendancePage() {
       setFormDate(m.date);
       setFormStartTime(m.startTime);
       setFormEndTime(m.endTime);
+      const diff = calculateMinutesDiff(m.startTime, m.endTime);
+      handleDurationChange(diff);
       setFormType(m.mode);
       setFormLocation(m.location);
       setFormAgenda(m.agenda);
       setFormObjectives(m.objectives || 'Review deliverables and assign sprint action items.');
       if (m.meetingLink) setFormMeetingLink(m.meetingLink);
+
+      // Pre-fill existing attendance for this scheduled meeting if available
+      const meetingExistingAtt = attendance.filter((a) => a.meetingId === m.id);
+      if (meetingExistingAtt.length > 0) {
+        setFormMemberAttendance((prev) => {
+          const updated = { ...prev };
+          members.forEach((mem) => {
+            const rec = meetingExistingAtt.find((a) => a.memberId === mem.id);
+            if (rec) {
+              const st = (rec.status === 'Present' || rec.status === 'Late' || rec.status === 'Absent')
+                ? rec.status
+                : 'Present';
+              updated[mem.id] = {
+                status: st,
+                minutesAttended: rec.durationMinutes !== undefined
+                  ? rec.durationMinutes
+                  : (st === 'Absent' ? 0 : diff),
+              };
+            }
+          });
+          return updated;
+        });
+      }
     }
   };
 
-  // Submit Create or Edit MoM
+  // Submit Create or Edit MoM with Integrated Attendance Persistence
   const handleSaveMOMSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentUser) return;
+
+    if (formDuration <= 0) {
+      alert('Total meeting duration must be greater than 0 minutes.');
+      return;
+    }
+
+    // Validate Late members have valid numeric minutes
+    for (const m of members) {
+      const att = formMemberAttendance[m.id];
+      if (att && att.status === 'Late') {
+        if (att.minutesAttended === '' || isNaN(Number(att.minutesAttended))) {
+          alert(`Please enter the minutes attended (0 to ${formDuration}) for Late member: ${m.name}.`);
+          return;
+        }
+        const mins = Number(att.minutesAttended);
+        if (mins < 0 || mins > formDuration) {
+          alert(`Minutes attended for ${m.name} must be between 0 and ${formDuration} minutes.`);
+          return;
+        }
+      }
+    }
+
     setIsSubmittingMOM(true);
 
+    const targetMeetingId = formMeetingId || (editingMomId ? editingMomId : `meeting-${Date.now()}`);
+
+    const attendeeIds: string[] = [];
+    const absenteeIds: string[] = [];
+    members.forEach((m) => {
+      const att = formMemberAttendance[m.id] || { status: 'Present', minutesAttended: formDuration };
+      if (att.status === 'Absent') {
+        absenteeIds.push(m.id);
+      } else {
+        attendeeIds.push(m.id);
+      }
+    });
+
     const payload = {
-      meetingId: formMeetingId || `meeting-${Date.now()}`,
+      meetingId: targetMeetingId,
       departmentId: formDeptId,
       title: formTitle,
       meetingDate: formDate,
@@ -351,7 +479,8 @@ export default function MOMsAndAttendancePage() {
       location: formLocation,
       agenda: formAgenda,
       objectives: formObjectives,
-      attendeeMemberIds: members.slice(0, 6).map((m) => m.id),
+      attendeeIds,
+      absenteeIds,
       discussionPoints: formDiscussionPoints.filter((dp) => dp.topic.trim()),
       decisionsMade: formDecisions.filter((d) => d.trim()).map((d) => ({ decision: d })),
       actionItems: formActionItems
@@ -366,32 +495,60 @@ export default function MOMsAndAttendancePage() {
       publicationStatus: formPublicationStatus,
     };
 
+    let saveSuccess = false;
+    let errorMessage = '';
+
     if (formIsEditing && editingMomId) {
       const res = await updateMOM({
         id: editingMomId,
         ...payload,
         editorId: currentUser.id,
-        editorNote: 'Content updated via 2-key authorized session',
+        editorNote: 'Content and attendance updated via MoM editor',
       });
-      setIsSubmittingMOM(false);
-      if (res.success) {
-        setShowCreateModal(false);
-        await refreshAll();
-        alert('MOM updated successfully!');
-      } else {
-        alert(res.error || 'Failed to update MOM');
-      }
+      saveSuccess = res.success;
+      errorMessage = res.error || 'Failed to update MOM';
     } else {
       const res = await addMOM(payload);
-      setIsSubmittingMOM(false);
-      if (res.success) {
-        setShowCreateModal(false);
-        await refreshAll();
-        alert(`MOM created as ${formPublicationStatus}!`);
-      } else {
-        alert(res.error || 'Failed to create MOM');
-      }
+      saveSuccess = res.success;
+      errorMessage = res.error || 'Failed to create MOM';
     }
+
+    if (!saveSuccess) {
+      setIsSubmittingMOM(false);
+      alert(errorMessage);
+      return;
+    }
+
+    // Persist Attendance Records linked to this meeting
+    try {
+      const attendancePayload = {
+        meetingId: targetMeetingId,
+        departmentId: formDeptId,
+        markedById: currentUser.id,
+        records: members.map((m) => {
+          const att = formMemberAttendance[m.id] || { status: 'Present', minutesAttended: formDuration };
+          const mins = att.status === 'Absent' ? 0 : Number(att.minutesAttended);
+          return {
+            memberId: m.id,
+            status: att.status,
+            durationMinutes: mins,
+            notes: `Attended ${mins} min of ${formDuration} min meeting`,
+          };
+        }),
+      };
+      await recordAttendance(attendancePayload);
+    } catch (attErr) {
+      console.error('Error saving attendance records:', attErr);
+    }
+
+    setIsSubmittingMOM(false);
+    setShowCreateModal(false);
+    await refreshAll();
+    alert(
+      formIsEditing
+        ? 'MOM and attendance updated successfully!'
+        : `MOM and attendance saved as ${formPublicationStatus}!`
+    );
   };
 
   // Submit Edit Request (2-Key approval)
@@ -478,6 +635,8 @@ export default function MOMsAndAttendancePage() {
     setFormDate(mom.meetingDate);
     setFormStartTime(mom.startTime);
     setFormEndTime(mom.endTime);
+    const diff = calculateMinutesDiff(mom.startTime, mom.endTime);
+    setFormDuration(diff);
     setFormType(mom.meetingType);
     setFormLocation(mom.location);
     setFormAgenda(mom.agenda);
@@ -493,6 +652,33 @@ export default function MOMsAndAttendancePage() {
       }))
     );
     setFormPublicationStatus(mom.publicationStatus);
+
+    // Pre-fill attendance records for this meeting
+    const meetingExistingAtt = attendance.filter((a) => a.meetingId === mom.meetingId);
+    const loadedAtt: Record<string, FormMemberAttendance> = {};
+    members.forEach((m) => {
+      const rec = meetingExistingAtt.find((a) => a.memberId === m.id);
+      if (rec) {
+        const st = (rec.status === 'Present' || rec.status === 'Late' || rec.status === 'Absent')
+          ? rec.status
+          : 'Present';
+        loadedAtt[m.id] = {
+          status: st,
+          minutesAttended: rec.durationMinutes !== undefined
+            ? rec.durationMinutes
+            : (st === 'Absent' ? 0 : diff),
+        };
+      } else {
+        const isAbsent = mom.absenteeIds?.includes(m.id);
+        const st = isAbsent ? 'Absent' : 'Present';
+        loadedAtt[m.id] = {
+          status: st,
+          minutesAttended: st === 'Absent' ? 0 : diff,
+        };
+      }
+    });
+    setFormMemberAttendance(loadedAtt);
+    setAttendanceSearchTerm('');
     setShowCreateModal(true);
   };
 
@@ -532,70 +718,8 @@ export default function MOMsAndAttendancePage() {
         </div>
       </div>
 
-      {/* Main Tabs Navigation */}
-      <div className="flex border-b border-[#E3EBE7] bg-white rounded-2xl px-3 pt-2 shadow-sm gap-2 overflow-x-auto">
-        <button
-          onClick={() => setActiveTab('moms')}
-          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold transition border-b-2 whitespace-nowrap ${
-            activeTab === 'moms'
-              ? 'border-[#2FC3A5] text-[#0D5143]'
-              : 'border-transparent text-[#82918B] hover:text-[#263832]'
-          }`}
-        >
-          <FileText className="h-4 w-4" />
-          <span>Official MoM Records</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('attendance')}
-          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold transition border-b-2 whitespace-nowrap ${
-            activeTab === 'attendance'
-              ? 'border-[#2FC3A5] text-[#0D5143]'
-              : 'border-transparent text-[#82918B] hover:text-[#263832]'
-          }`}
-        >
-          <ClipboardCheck className="h-4 w-4" />
-          <span>HR Attendance Interface</span>
-          <span className="rounded-full bg-[#E7F3D7] px-2 py-0.5 text-[10px] text-[#0D5143] font-bold">
-            Interactive
-          </span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('reports')}
-          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold transition border-b-2 whitespace-nowrap ${
-            activeTab === 'reports'
-              ? 'border-[#2FC3A5] text-[#0D5143]'
-              : 'border-transparent text-[#82918B] hover:text-[#263832]'
-          }`}
-        >
-          <History className="h-4 w-4" />
-          <span>Attendance Reports & Analytics</span>
-        </button>
-
-        {(permissions.isDeptHead || permissions.isPresident || permissions.isHRHead) && (
-          <button
-            onClick={() => setActiveTab('approvals')}
-            className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold transition border-b-2 whitespace-nowrap ${
-              activeTab === 'approvals'
-                ? 'border-[#2FC3A5] text-[#0D5143]'
-                : 'border-transparent text-[#82918B] hover:text-[#263832]'
-            }`}
-          >
-            <ShieldAlert className="h-4 w-4" />
-            <span>2-Key Edit Approvals</span>
-            {editRequests.filter((r) => r.status === 'Pending').length > 0 && (
-              <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] text-amber-800 font-bold">
-                {editRequests.filter((r) => r.status === 'Pending').length} Pending
-              </span>
-            )}
-          </button>
-        )}
-      </div>
-
-      {/* ==================== TAB 1: MOM RECORDS ==================== */}
-      {activeTab === 'moms' && (
-        <div className="space-y-6">
+      {/* ==================== OFFICIAL MOM RECORDS ==================== */}
+      <div className="space-y-6">
           {/* Filter Toolbar */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 rounded-2xl border border-[#E3EBE7] bg-white p-4 shadow-sm">
             <div className="relative">
@@ -741,371 +865,6 @@ export default function MOMsAndAttendancePage() {
             )}
           </div>
         </div>
-      )}
-
-      {/* ==================== TAB 2: HR ATTENDANCE INTERFACE ==================== */}
-      {activeTab === 'attendance' && (
-        <div className="space-y-6">
-          {/* Meeting Selection & Instructions Bar */}
-          <div className="rounded-2xl border border-[#E3EBE7] bg-white p-5 shadow-sm space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <h3 className="font-black text-base text-[#263832]">Member-Card Attendance Interface</h3>
-                <p className="text-xs text-[#637d74] mt-0.5">
-                  Default status is <strong>Present</strong>. Tap any card: 1st tap &rarr; <strong>Absent</strong>, 2nd tap &rarr; <strong>Late</strong>, 3rd tap &rarr; <strong>Excused</strong>.
-                </p>
-              </div>
-
-              {/* Live Attendance Counter */}
-              <div className="flex items-center gap-2 rounded-2xl bg-[#E7F3D7] px-4 py-2 text-xs border border-[#2FC3A5]/40">
-                <span className="font-bold text-[#0D5143]">Live Quorum:</span>
-                <span className="font-black text-sm text-[#0D5143]">
-                  {attendanceCounts.present}/{attendanceCounts.total} Present ({attendanceCounts.percent}%)
-                </span>
-                <span className="text-[10px] text-[#637d74]">
-                  • {attendanceCounts.absent} Absent • {attendanceCounts.late} Late
-                </span>
-              </div>
-            </div>
-
-            {/* Select Meeting & Capture Controls */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-[#E3EBE7]">
-              <div>
-                <label className="block text-[11px] font-bold text-[#263832] mb-1">Target Meeting Record:</label>
-                <select
-                  value={attendanceMeetingId}
-                  onChange={(e) => setAttendanceMeetingId(e.target.value)}
-                  className="w-full rounded-xl border border-[#E3EBE7] bg-[#F7F9F7] px-3 py-2 text-xs text-[#263832] focus:outline-none focus:border-[#2FC3A5]"
-                >
-                  {meetings.map((m) => (
-                    <option key={m.id} value={m.id}>
-                      {m.title} ({m.date} • {m.startTime})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-bold text-[#263832] mb-1">Recording Source:</label>
-                <select
-                  value={attendanceSource}
-                  onChange={(e) => setAttendanceSource(e.target.value as any)}
-                  className="w-full rounded-xl border border-[#E3EBE7] bg-[#F7F9F7] px-3 py-2 text-xs text-[#263832] focus:outline-none focus:border-[#2FC3A5]"
-                >
-                  <option value="manual">Manual Entry (HR Verified)</option>
-                  <option value="platform">Google Meet / Platform Import</option>
-                  <option value="csv">Approved CSV Import</option>
-                </select>
-              </div>
-
-              <div className="flex items-end">
-                <button
-                  onClick={handleSaveAttendance}
-                  disabled={isSavingAttendance || departmentMembers.length === 0}
-                  className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#2FC3A5] hover:bg-[#28af94] py-2 px-4 text-xs font-bold text-white shadow-sm transition disabled:opacity-50"
-                >
-                  <Save className="h-4 w-4" />
-                  <span>{isSavingAttendance ? 'Saving Attendance...' : 'Save & Audit Attendance'}</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Member Attendance Cards Grid */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between text-xs text-[#637d74] px-1">
-              <span>Department Roster: <strong>{departmentMembers.length} Members</strong></span>
-              <span className="text-[11px]">Click any card to cycle attendance</span>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-              {departmentMembers.map((member) => {
-                const status = attendanceMemberStates[member.id] || 'Present';
-                const isPresent = status === 'Present';
-                const isAbsent = status === 'Absent';
-                const isLate = status === 'Late';
-                const isExcused = status === 'Excused';
-
-                return (
-                  <div
-                    key={member.id}
-                    onClick={() => handleToggleAttendanceCard(member.id)}
-                    className={`cursor-pointer rounded-2xl border p-4 transition shadow-sm select-none relative ${
-                      isPresent
-                        ? 'border-[#2FC3A5] bg-white hover:bg-[#DDF7EF]/40'
-                        : isAbsent
-                        ? 'border-rose-300 bg-rose-50/40 hover:bg-rose-50'
-                        : isLate
-                        ? 'border-amber-300 bg-amber-50/40 hover:bg-amber-50'
-                        : 'border-blue-300 bg-blue-50/40 hover:bg-blue-50'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <img
-                        src={member.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'}
-                        alt={member.name}
-                        className="h-10 w-10 rounded-full object-cover border border-[#E3EBE7]"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-bold text-xs text-[#263832] truncate">{member.name}</h4>
-                        <p className="text-[10px] text-[#82918B] truncate">{member.roleTitle}</p>
-                        <p className="text-[10px] font-mono text-[#637d74] truncate">{member.memberId}</p>
-                      </div>
-                    </div>
-
-                    <div className="mt-3 pt-2 border-t border-[#E3EBE7]/60 flex items-center justify-between">
-                      <span className="text-[10px] text-[#82918B]">Tap to cycle</span>
-
-                      <span
-                        className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold flex items-center gap-1 ${
-                          isPresent
-                            ? 'bg-[#E7F3D7] text-[#0D5143]'
-                            : isAbsent
-                            ? 'bg-rose-100 text-rose-800'
-                            : isLate
-                            ? 'bg-amber-100 text-amber-800'
-                            : 'bg-blue-100 text-blue-800'
-                        }`}
-                      >
-                        {isPresent && <Check className="h-3 w-3 text-[#2FC3A5]" />}
-                        {isAbsent && <XCircle className="h-3 w-3" />}
-                        {isLate && <Clock className="h-3 w-3" />}
-                        <span>{status}</span>
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ==================== TAB 3: ATTENDANCE REPORTS & ANALYTICS ==================== */}
-      {activeTab === 'reports' && (
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="rounded-2xl border border-[#E3EBE7] bg-white p-5 shadow-sm">
-              <div className="text-[10px] font-bold text-[#82918B] uppercase">Total Meetings Recorded</div>
-              <div className="text-2xl font-black text-[#263832] mt-1">{meetings.length} Syncs</div>
-              <p className="text-xs text-[#637d74] mt-1">Across all 8 operational hubs</p>
-            </div>
-
-            <div className="rounded-2xl border border-[#E3EBE7] bg-white p-5 shadow-sm">
-              <div className="text-[10px] font-bold text-[#82918B] uppercase">Overall Society Quorum</div>
-              <div className="text-2xl font-black text-[#0D5143] mt-1">87.4%</div>
-              <p className="text-xs text-[#637d74] mt-1">Excluding approved leaves & excused absences</p>
-            </div>
-
-            <div className="rounded-2xl border border-[#E3EBE7] bg-white p-5 shadow-sm">
-              <div className="text-[10px] font-bold text-[#82918B] uppercase">Extra-Hour Reviews Flagged</div>
-              <div className="text-2xl font-black text-amber-700 mt-1">3 Sessions</div>
-              <p className="text-xs text-[#637d74] mt-1">Recorded duration &gt; scheduled duration</p>
-            </div>
-          </div>
-
-          {/* Member-Wise History Table */}
-          <div className="overflow-hidden rounded-2xl border border-[#E3EBE7] bg-white shadow-sm">
-            <div className="p-4 border-b border-[#E3EBE7] flex items-center justify-between">
-              <div>
-                <h3 className="font-bold text-sm text-[#263832]">Member Attendance Ledger</h3>
-                <p className="text-xs text-[#637d74]">Scheduled hours vs recorded attendance hours</p>
-              </div>
-
-              <button
-                onClick={() => {
-                  const headers = ['Member Name', 'Member ID', 'Department', 'Attended Meetings', 'Total Eligible', 'Attendance Rate'];
-                  const rows = members.map((m) => {
-                    const memAtt = attendance.filter((a) => a.memberId === m.id);
-                    const attended = memAtt.filter((a) => a.status === 'Present' || a.status === 'Late').length;
-                    const total = memAtt.length || 1;
-                    const rate = Math.round((attended / total) * 100);
-                    return [`"${m.name}"`, `"${m.memberId}"`, `"${m.primaryDepartmentId}"`, attended, total, `"${rate}%"`];
-                  });
-                  const csv = '\uFEFF' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\r\n');
-                  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-                  const link = document.createElement('a');
-                  link.href = URL.createObjectURL(blob);
-                  link.download = `enactus_attendance_report_${new Date().toISOString().split('T')[0]}.csv`;
-                  document.body.appendChild(link);
-                  link.click();
-                  document.body.removeChild(link);
-                }}
-                className="flex items-center gap-2 rounded-xl border border-[#E3EBE7] bg-white px-3 py-1.5 text-xs font-semibold text-[#263832] hover:bg-[#DDF7EF] hover:border-[#2FC3A5] transition"
-              >
-                <Download className="h-4 w-4 text-[#2FC3A5]" />
-                <span>Export Report (.csv)</span>
-              </button>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead className="border-b border-[#E3EBE7] bg-[#F7F9F7] text-[#263832] font-bold">
-                  <tr>
-                    <th className="py-3 px-4">Member</th>
-                    <th className="py-3 px-4">Department</th>
-                    <th className="py-3 px-4">Attended Meetings</th>
-                    <th className="py-3 px-4">Scheduled Hours</th>
-                    <th className="py-3 px-4">Recorded Hours</th>
-                    <th className="py-3 px-4">Attendance %</th>
-                    <th className="py-3 px-4 text-right">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#E3EBE7]">
-                  {members.map((m) => {
-                    const memAtt = attendance.filter((a) => a.memberId === m.id);
-                    const attended = memAtt.filter((a) => a.status === 'Present' || a.status === 'Late').length;
-                    const totalEligible = memAtt.length || 2;
-                    const rate = Math.round((attended / totalEligible) * 100);
-                    const scheduledHours = totalEligible * 1.5;
-                    const recordedHours = attended * 1.5;
-
-                    return (
-                      <tr key={m.id} className="hover:bg-[#F7F9F7]/70 transition">
-                        <td className="py-3 px-4">
-                          <div className="font-bold text-[#263832]">{m.name}</div>
-                          <div className="text-[10px] font-mono text-[#82918B]">{m.memberId}</div>
-                        </td>
-                        <td className="py-3 px-4">
-                          <span className="rounded-full bg-[#E7F3D7] px-2 py-0.5 text-[10px] font-bold text-[#0D5143]">
-                            {departments.find((d) => d.id === m.primaryDepartmentId)?.name || 'General'}
-                          </span>
-                        </td>
-                        <td className="py-3 px-4 font-semibold text-[#263832]">
-                          {attended} / {totalEligible}
-                        </td>
-                        <td className="py-3 px-4 text-[#637d74]">{scheduledHours} hrs</td>
-                        <td className="py-3 px-4 text-[#637d74] font-semibold">{recordedHours} hrs</td>
-                        <td className="py-3 px-4">
-                          <div className="flex items-center gap-2">
-                            <div className="w-16 h-2 rounded-full bg-[#E3EBE7] overflow-hidden">
-                              <div
-                                className="h-full bg-[#2FC3A5]"
-                                style={{ width: `${rate}%` }}
-                              />
-                            </div>
-                            <span className="font-bold text-[#263832]">{rate}%</span>
-                          </div>
-                        </td>
-                        <td className="py-3 px-4 text-right">
-                          <span
-                            className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                              rate >= 75
-                                ? 'bg-emerald-50 text-emerald-700'
-                                : 'bg-rose-50 text-rose-700'
-                            }`}
-                          >
-                            {rate >= 75 ? 'Compliant' : 'Short Attendance'}
-                          </span>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ==================== TAB 4: 2-KEY EDIT APPROVALS (HOD/Admin) ==================== */}
-      {activeTab === 'approvals' && (
-        <div className="space-y-6">
-          <div className="rounded-2xl border border-amber-200 bg-amber-50/60 p-5">
-            <h3 className="font-bold text-sm text-amber-900">2-Key Governance Protocol</h3>
-            <p className="text-xs text-amber-800 mt-1">
-              Published MoMs are locked official records. When HR requests an edit, the Department Head must inspect the reason and approve. An approval grants a <strong>24-hour editing window</strong>, and permanently attaches a <strong>Changed After Publishing</strong> badge to the official record.
-            </p>
-          </div>
-
-          <div className="overflow-hidden rounded-2xl border border-[#E3EBE7] bg-white shadow-sm">
-            <div className="p-4 border-b border-[#E3EBE7] font-bold text-sm text-[#263832]">
-              Pending & Historical Edit Requests
-            </div>
-
-            <div className="divide-y divide-[#E3EBE7]">
-              {editRequests.length === 0 ? (
-                <div className="p-12 text-center text-xs text-[#82918B]">
-                  No edit requests have been logged yet.
-                </div>
-              ) : (
-                editRequests.map((req) => {
-                  const targetMom = moms.find((m) => m.id === req.momId);
-                  const isPending = req.status === 'Pending';
-
-                  return (
-                    <div key={req.id} className="p-5 space-y-3">
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                        <div>
-                          <span className="text-[10px] font-mono text-[#82918B] block">Request ID: {req.id}</span>
-                          <h4 className="font-bold text-sm text-[#263832]">
-                            MOM: {targetMom?.title || req.momId}
-                          </h4>
-                          <p className="text-xs text-[#637d74]">
-                            Requested by <strong>{req.requestedByName}</strong> on {new Date(req.requestedAt).toLocaleString()}
-                          </p>
-                        </div>
-
-                        <span
-                          className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${
-                            req.status === 'Approved'
-                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                              : req.status === 'Rejected'
-                              ? 'bg-rose-50 text-rose-700 border border-rose-200'
-                              : 'bg-amber-50 text-amber-800 border border-amber-200'
-                          }`}
-                        >
-                          {req.status}
-                        </span>
-                      </div>
-
-                      <div className="rounded-xl border border-[#E3EBE7] bg-[#F7F9F7] p-3 text-xs space-y-1">
-                        <div>
-                          <strong className="text-[#263832]">Mandatory Justification:</strong>{' '}
-                          <span className="text-[#637d74]">{req.reason}</span>
-                        </div>
-                        {req.proposedChanges && (
-                          <div>
-                            <strong className="text-[#263832]">Proposed Alterations:</strong>{' '}
-                            <span className="text-[#637d74]">{req.proposedChanges}</span>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* HOD Review Controls */}
-                      {isPending && (permissions.isDeptHead || permissions.isPresident) && (
-                        <div className="pt-2 flex flex-col sm:flex-row items-center gap-3">
-                          <input
-                            type="text"
-                            placeholder="Optional reviewer notes / comments..."
-                            value={reviewerComment}
-                            onChange={(e) => setReviewerComment(e.target.value)}
-                            className="flex-1 rounded-xl border border-[#E3EBE7] bg-[#F7F9F7] px-3 py-1.5 text-xs text-[#263832] focus:outline-none focus:border-[#2FC3A5]"
-                          />
-                          <button
-                            onClick={() => handleReviewEditRequest(req.id, 'Approved')}
-                            disabled={isReviewingReq}
-                            className="rounded-xl bg-[#2FC3A5] hover:bg-[#28af94] px-4 py-1.5 text-xs font-bold text-white transition shadow-sm"
-                          >
-                            Approve (24h Unlock)
-                          </button>
-                          <button
-                            onClick={() => handleReviewEditRequest(req.id, 'Rejected')}
-                            disabled={isReviewingReq}
-                            className="rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 px-4 py-1.5 text-xs font-bold text-rose-700 transition"
-                          >
-                            Reject
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })
-              )}
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* ==================== SPLIT-SCREEN MOM DETAIL MODAL ==================== */}
       {selectedMOM && !showEditRequestModal && (
@@ -1211,6 +970,60 @@ export default function MOMsAndAttendancePage() {
                       <div className="text-[#637d74] mt-1">{dp.notes || 'No detailed notes.'}</div>
                     </div>
                   ))}
+                </div>
+
+                {/* Meeting Attendance & Attended Duration List */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="text-xs font-bold text-[#263832] uppercase tracking-wider">
+                      Meeting Attendance & Duration ({selectedMomAttendanceRecords.length})
+                    </h4>
+                    <span className="text-[10px] text-[#637d74] font-medium">
+                      Total Duration: {selectedMomCalculatedDuration} min
+                    </span>
+                  </div>
+
+                  <div className="rounded-2xl border border-[#E3EBE7] bg-white overflow-hidden shadow-xs divide-y divide-[#E3EBE7] max-h-72 overflow-y-auto">
+                    {selectedMomAttendanceRecords.map(({ member, status, duration }) => {
+                      const isPresent = status === 'Present';
+                      const isLate = status === 'Late';
+
+                      return (
+                        <div key={member.id} className="flex items-center justify-between px-3.5 py-2.5 text-xs">
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <img
+                              src={member.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'}
+                              alt={member.name}
+                              className="h-7 w-7 rounded-full object-cover border border-[#E3EBE7] shrink-0"
+                            />
+                            <div className="min-w-0">
+                              <div className="font-bold text-[#263832] truncate">{member.name}</div>
+                              <div className="text-[10px] text-[#82918B] truncate">
+                                {departments.find((d) => d.id === (member.primaryDepartmentId || member.assignedDepartmentId))?.name || 'Digital Operations'} • {member.roleTitle}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-3 shrink-0">
+                            <span
+                              className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
+                                isPresent
+                                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                  : isLate
+                                  ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                                  : 'bg-rose-50 text-rose-700 border border-rose-200'
+                              }`}
+                            >
+                              {status}
+                            </span>
+                            <span className="font-mono font-bold text-xs text-[#263832] min-w-[50px] text-right">
+                              {duration} min
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
 
@@ -1438,7 +1251,7 @@ export default function MOMsAndAttendancePage() {
                   <input
                     type="time"
                     value={formStartTime}
-                    onChange={(e) => setFormStartTime(e.target.value)}
+                    onChange={(e) => handleStartTimeChange(e.target.value)}
                     className="w-full rounded-xl border border-[#E3EBE7] bg-[#F7F9F7] px-3 py-2 text-xs text-[#263832]"
                   />
                 </div>
@@ -1448,8 +1261,21 @@ export default function MOMsAndAttendancePage() {
                   <input
                     type="time"
                     value={formEndTime}
-                    onChange={(e) => setFormEndTime(e.target.value)}
+                    onChange={(e) => handleEndTimeChange(e.target.value)}
                     className="w-full rounded-xl border border-[#E3EBE7] bg-[#F7F9F7] px-3 py-2 text-xs text-[#263832]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold text-[#263832] mb-1">Meeting Duration (min) *</label>
+                  <input
+                    type="number"
+                    min="1"
+                    required
+                    value={formDuration}
+                    onChange={(e) => handleDurationChange(parseInt(e.target.value) || 0)}
+                    placeholder="e.g. 60"
+                    className="w-full rounded-xl border border-[#E3EBE7] bg-[#F7F9F7] px-3 py-2 text-xs text-[#263832] focus:outline-none focus:border-[#2FC3A5]"
                   />
                 </div>
 
@@ -1592,6 +1418,157 @@ export default function MOMsAndAttendancePage() {
                       </button>
                     </div>
                   ))}
+                </div>
+              </div>
+
+              {/* Integrated Member Attendance Marking */}
+              <div className="rounded-2xl border border-[#2FC3A5]/40 bg-[#F7F9F7] p-4 space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <ClipboardCheck className="h-4 w-4 text-[#2FC3A5]" />
+                      <h4 className="font-bold text-xs text-[#263832] uppercase tracking-wider">
+                        Member Attendance & Duration Tracking
+                      </h4>
+                    </div>
+                    <p className="text-[11px] text-[#637d74] mt-0.5">
+                      Mark member attendance. <strong>Present</strong> members automatically receive full duration ({formDuration} min). <strong>Late</strong> members require manual minutes entry (0–{formDuration} min).
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 text-[10px] shrink-0 font-bold">
+                    <span className="rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 px-2 py-1">
+                      {formAttendanceCounts.present} Present
+                    </span>
+                    <span className="rounded-lg bg-amber-50 border border-amber-200 text-amber-800 px-2 py-1">
+                      {formAttendanceCounts.late} Late
+                    </span>
+                    <span className="rounded-lg bg-rose-50 border border-rose-200 text-rose-800 px-2 py-1">
+                      {formAttendanceCounts.absent} Absent
+                    </span>
+                  </div>
+                </div>
+
+                {/* Member Search / Filter Bar */}
+                <div className="relative">
+                  <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-[#82918B]" />
+                  <input
+                    type="text"
+                    value={attendanceSearchTerm}
+                    onChange={(e) => setAttendanceSearchTerm(e.target.value)}
+                    placeholder="Search member by name or department..."
+                    className="w-full rounded-xl border border-[#E3EBE7] bg-white pl-8 pr-3 py-1.5 text-xs text-[#263832] focus:outline-none focus:border-[#2FC3A5]"
+                  />
+                </div>
+
+                {/* Member Attendance Roster List */}
+                <div className="max-h-64 overflow-y-auto space-y-2 rounded-xl border border-[#E3EBE7] bg-white p-2">
+                  {filteredFormMembers.map((member) => {
+                    const att = formMemberAttendance[member.id] || { status: 'Present', minutesAttended: formDuration };
+                    const isPresent = att.status === 'Present';
+                    const isLate = att.status === 'Late';
+                    const isAbsent = att.status === 'Absent';
+
+                    return (
+                      <div
+                        key={member.id}
+                        className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-2.5 rounded-xl border transition ${
+                          isPresent
+                            ? 'border-[#2FC3A5]/40 bg-[#DDF7EF]/20'
+                            : isLate
+                            ? 'border-amber-200 bg-amber-50/30'
+                            : 'border-rose-200 bg-rose-50/20'
+                        }`}
+                      >
+                        {/* Member Info */}
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <img
+                            src={member.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'}
+                            alt={member.name}
+                            className="h-8 w-8 rounded-full object-cover border border-[#E3EBE7] shrink-0"
+                          />
+                          <div className="min-w-0">
+                            <div className="font-bold text-xs text-[#263832] truncate">{member.name}</div>
+                            <div className="text-[10px] text-[#82918B] truncate">
+                              {departments.find((d) => d.id === (member.primaryDepartmentId || member.assignedDepartmentId))?.name || 'Digital Operations'} • {member.roleTitle}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Status Selection & Minutes Attended */}
+                        <div className="flex items-center gap-2 shrink-0">
+                          {/* Status Selector Pills */}
+                          <div className="flex items-center rounded-lg bg-[#F7F9F7] p-0.5 border border-[#E3EBE7] text-[11px] font-bold">
+                            <button
+                              type="button"
+                              onClick={() => handleMemberStatusChange(member.id, 'Present')}
+                              className={`px-2.5 py-1 rounded-md transition ${
+                                isPresent
+                                  ? 'bg-[#2FC3A5] text-white shadow-xs'
+                                  : 'text-[#637d74] hover:text-[#263832]'
+                              }`}
+                            >
+                              Present
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleMemberStatusChange(member.id, 'Late')}
+                              className={`px-2.5 py-1 rounded-md transition ${
+                                isLate
+                                  ? 'bg-amber-500 text-white shadow-xs'
+                                  : 'text-[#637d74] hover:text-[#263832]'
+                              }`}
+                            >
+                              Late
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleMemberStatusChange(member.id, 'Absent')}
+                              className={`px-2.5 py-1 rounded-md transition ${
+                                isAbsent
+                                  ? 'bg-rose-500 text-white shadow-xs'
+                                  : 'text-[#637d74] hover:text-[#263832]'
+                              }`}
+                            >
+                              Absent
+                            </button>
+                          </div>
+
+                          {/* Minutes Attended Display / Input */}
+                          <div className="min-w-[110px] flex items-center justify-end">
+                            {isPresent && (
+                              <span className="font-mono font-bold text-xs text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
+                                {formDuration} min
+                              </span>
+                            )}
+
+                            {isLate && (
+                              <div className="flex items-center gap-1">
+                                <input
+                                  type="number"
+                                  min="0"
+                                  max={formDuration}
+                                  value={att.minutesAttended}
+                                  onChange={(e) => handleLateMinutesChange(member.id, e.target.value)}
+                                  placeholder="Minutes"
+                                  className="w-16 rounded-lg border border-amber-300 bg-white px-2 py-1 text-xs text-[#263832] font-mono text-center focus:outline-none focus:border-amber-500"
+                                />
+                                <span className="text-[10px] font-bold text-amber-800">
+                                  / {formDuration}m
+                                </span>
+                              </div>
+                            )}
+
+                            {isAbsent && (
+                              <span className="font-mono font-bold text-xs text-rose-800 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-200">
+                                0 min
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 

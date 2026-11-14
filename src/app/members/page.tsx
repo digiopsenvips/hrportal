@@ -128,7 +128,10 @@ export default function MembersPage() {
         (isAuthorizedSensitive && m.email.toLowerCase().includes(searchQuery.toLowerCase()));
 
       const matchesDept = filterDept === 'ALL' || m.primaryDepartmentId === filterDept;
-      const matchesRole = filterRole === 'ALL' || m.role === filterRole;
+      const matchesRole =
+        filterRole === 'ALL' ||
+        (filterRole === 'core' && m.role !== 'developer') ||
+        (filterRole === 'developer' && m.role === 'developer');
       const matchesSemester = filterSemester === 'ALL' || m.currentSemester === Number(filterSemester);
 
       return matchesSearch && matchesDept && matchesRole && matchesSemester;
@@ -534,15 +537,8 @@ export default function MembersPage() {
             className="w-full rounded-xl border border-[#E3EBE7] bg-[#F7F9F7] px-3 py-2 text-xs text-[#263832] focus:outline-none focus:border-[#2FC3A5]"
           >
             <option value="ALL">All Roles</option>
-            <option value="president">President</option>
-            <option value="vp_1">Vice President 1</option>
-            <option value="vp_2">Vice President 2</option>
-            <option value="vp_3">Vice President 3</option>
-            <option value="secretary">Secretary</option>
-            <option value="hr_head">HR Head</option>
-            <option value="dept_head">Department Head</option>
-            <option value="secondary_hr">Secondary HR</option>
-            <option value="general_member">General Member</option>
+            <option value="core">Core Members</option>
+            <option value="developer">Developers</option>
           </select>
         </div>
 

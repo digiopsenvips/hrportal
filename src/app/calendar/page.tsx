@@ -27,19 +27,96 @@ import {
   CalendarDays,
   ListFilter,
   Eye,
+  Plus,
+  AlertCircle,
 } from 'lucide-react';
 
 export type CalendarViewType = 'day' | 'week' | 'month' | 'year' | 'agenda';
 
 export default function CalendarPage() {
   const { currentUser } = useAuth();
-  const { departments, members, meetings, moms, attendance } = useData();
+  const { departments, members, meetings, moms, attendance, events, addMeeting, refreshAll } = useData();
 
   // Filters and views
   const [filterDept, setFilterDept] = useState('ALL');
   const [calendarView, setCalendarView] = useState<CalendarViewType>('week');
   const [selectedMeeting, setSelectedMeeting] = useState<Meeting | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
+
+  // Schedule creation modal state
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [scheduleTitle, setScheduleTitle] = useState('');
+  const [scheduleDeptId, setScheduleDeptId] = useState('ALL');
+  const [scheduleDate, setScheduleDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [scheduleStartTime, setScheduleStartTime] = useState('15:00');
+  const [scheduleEndTime, setScheduleEndTime] = useState('16:30');
+  const [scheduleMode, setScheduleMode] = useState<'Online' | 'Offline' | 'Hybrid'>('Online');
+  const [scheduleLocation, setScheduleLocation] = useState('Google Meet');
+  const [scheduleMeetingLink, setScheduleMeetingLink] = useState('https://meet.google.com/enactus-sync');
+  const [scheduleAgenda, setScheduleAgenda] = useState('');
+  const [scheduleError, setScheduleError] = useState('');
+  const [isSubmittingSchedule, setIsSubmittingSchedule] = useState(false);
+
+  const handleCreateSchedule = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setScheduleError('');
+
+    if (!scheduleTitle.trim()) {
+      setScheduleError('Title is required');
+      return;
+    }
+    if (!scheduleDate) {
+      setScheduleError('Date is required');
+      return;
+    }
+    if (!scheduleStartTime || !scheduleEndTime) {
+      setScheduleError('Start and end times are required');
+      return;
+    }
+    if (scheduleStartTime >= scheduleEndTime) {
+      setScheduleError('End time must be after start time');
+      return;
+    }
+
+    setIsSubmittingSchedule(true);
+    try {
+      const payload = {
+        title: scheduleTitle.trim(),
+        departmentId: scheduleDeptId,
+        date: scheduleDate,
+        startTime: scheduleStartTime,
+        endTime: scheduleEndTime,
+        mode: scheduleMode,
+        location: scheduleLocation.trim() || (scheduleMode === 'Online' ? 'Google Meet' : 'VIPS Campus'),
+        meetingLink: scheduleMeetingLink.trim(),
+        agenda: scheduleAgenda.trim(),
+        organizerId: currentUser?.id || 'mem-001',
+        attendeeMemberIds: [],
+        ignoreConflict: true,
+      };
+
+      const res = await addMeeting(payload);
+
+      if (res.success) {
+        setShowScheduleModal(false);
+        setScheduleTitle('');
+        setScheduleAgenda('');
+        // Automatically navigate calendar view to the scheduled date if not already in range
+        const scheduledDateObj = new Date(scheduleDate);
+        if (!isNaN(scheduledDateObj.getTime())) {
+          scheduledDateObj.setHours(0, 0, 0, 0);
+          setCurrentDate(scheduledDateObj);
+        }
+        await refreshAll();
+      } else {
+        setScheduleError(res.error || 'Failed to add schedule to calendar');
+      }
+    } catch (err: any) {
+      setScheduleError(err.message || 'Error creating schedule');
+    } finally {
+      setIsSubmittingSchedule(false);
+    }
+  };
 
   // Active anchor date for calendar navigation
   const [currentDate, setCurrentDate] = useState<Date>(() => {
@@ -70,15 +147,48 @@ export default function CalendarPage() {
     return days;
   }, [currentWeekMonday]);
 
+  // Map of all scheduled items (meetings and society events)
+  const combinedSchedules = useMemo(() => {
+    const list: Meeting[] = [...meetings];
+    if (Array.isArray(events)) {
+      events.forEach((evt) => {
+        const evtDate = evt.startDateTime ? evt.startDateTime.slice(0, 10) : '';
+        const evtStartTime = evt.startDateTime ? evt.startDateTime.slice(11, 16) : '09:00';
+        const evtEndTime = evt.endDateTime ? evt.endDateTime.slice(11, 16) : '18:00';
+        if (evtDate && !list.some((m) => m.id === evt.id || (m.title === evt.title && m.date === evtDate))) {
+          list.push({
+            id: evt.id,
+            title: evt.title,
+            departmentId: evt.organizingDepartmentId || 'ALL',
+            date: evtDate,
+            startTime: evtStartTime,
+            endTime: evtEndTime,
+            mode: 'Offline',
+            location: evt.venue || 'Campus Venue',
+            meetingLink: '',
+            agenda: evt.description || '',
+            objectives: evt.description || '',
+            organizerId: evt.organizerIds?.[0] || 'mem-001',
+            attendeeMemberIds: [],
+            status: 'Scheduled',
+            hasMom: false,
+            createdAt: evt.createdAt || new Date().toISOString(),
+          });
+        }
+      });
+    }
+    return list;
+  }, [meetings, events]);
+
   // Filter meetings by department
   const filteredMeetings = useMemo(() => {
-    return meetings.filter((m) => {
+    return combinedSchedules.filter((m) => {
       if (filterDept !== 'ALL' && m.departmentId !== filterDept && m.departmentId !== 'ALL') {
         return false;
       }
       return true;
     });
-  }, [meetings, filterDept]);
+  }, [combinedSchedules, filterDept]);
 
   // Map of meetings indexed by date string (YYYY-MM-DD) for fast lookup
   const meetingsByDate = useMemo(() => {
@@ -402,6 +512,16 @@ export default function CalendarPage() {
         </div>
 
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              setScheduleError('');
+              setShowScheduleModal(true);
+            }}
+            className="flex items-center gap-2 rounded-xl bg-[#2FC3A5] hover:bg-[#28af94] px-4 py-2.5 text-xs font-bold text-white shadow-sm transition"
+          >
+            <Plus className="h-4 w-4" />
+            <span>Add Schedule</span>
+          </button>
           <button
             onClick={handleExportICal}
             className="flex items-center gap-2 rounded-xl border border-[#E3EBE7] bg-white px-3.5 py-2.5 text-xs font-bold text-[#263832] hover:bg-[#DDF7EF] hover:border-[#2FC3A5] transition shadow-sm"
@@ -1072,13 +1192,190 @@ export default function CalendarPage() {
                   </div>
                 </div>
                 <Link
-                  href={`/moms?tab=attendance`}
+                  href="/moms"
                   className="rounded-lg bg-[#F7F9F7] border border-[#E3EBE7] px-2.5 py-1 text-xs font-bold text-[#263832] hover:bg-[#DDF7EF]"
                 >
-                  Mark Cards
+                  Create / View MoM
                 </Link>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ==================== ADD SCHEDULE MODAL ==================== */}
+      {showScheduleModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm animate-fadeIn">
+          <div className="w-full max-w-lg rounded-3xl border border-[#E3EBE7] bg-white p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-[#E3EBE7] pb-3 mb-4">
+              <div className="flex items-center gap-2">
+                <CalendarCheck className="h-5 w-5 text-[#2FC3A5]" />
+                <h3 className="font-bold text-base text-[#263832]">Add Schedule</h3>
+              </div>
+              <button
+                onClick={() => setShowScheduleModal(false)}
+                className="rounded-full p-1 text-[#82918B] hover:bg-[#F7F9F7] transition"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {scheduleError && (
+              <div className="mb-4 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-700 flex items-center gap-2">
+                <AlertCircle className="h-4 w-4 shrink-0 text-rose-600" />
+                <span>{scheduleError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleCreateSchedule} className="space-y-3.5">
+              <div>
+                <label className="block text-xs font-bold text-[#263832] mb-1">
+                  Schedule Title <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  required
+                  type="text"
+                  value={scheduleTitle}
+                  onChange={(e) => setScheduleTitle(e.target.value)}
+                  placeholder="e.g. Weekly Strategy & Project Review"
+                  className="w-full rounded-xl border border-[#E3EBE7] bg-[#F7F9F7] px-3.5 py-2 text-xs text-[#263832] focus:outline-none focus:border-[#2FC3A5] focus:bg-white transition"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-[#263832] mb-1">
+                    Department Hub <span className="text-rose-500">*</span>
+                  </label>
+                  <select
+                    value={scheduleDeptId}
+                    onChange={(e) => setScheduleDeptId(e.target.value)}
+                    className="w-full rounded-xl border border-[#E3EBE7] bg-[#F7F9F7] px-3 py-2 text-xs text-[#263832] focus:outline-none focus:border-[#2FC3A5] focus:bg-white transition"
+                  >
+                    <option value="ALL">All Hubs & Society Syncs</option>
+                    {departments.map((d) => (
+                      <option key={d.id} value={d.id}>
+                        {d.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-[#263832] mb-1">
+                    Meeting Mode
+                  </label>
+                  <select
+                    value={scheduleMode}
+                    onChange={(e) => setScheduleMode(e.target.value as any)}
+                    className="w-full rounded-xl border border-[#E3EBE7] bg-[#F7F9F7] px-3 py-2 text-xs text-[#263832] focus:outline-none focus:border-[#2FC3A5] focus:bg-white transition"
+                  >
+                    <option value="Online">Online</option>
+                    <option value="Offline">Offline</option>
+                    <option value="Hybrid">Hybrid</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-[#263832] mb-1">
+                    Date <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    required
+                    type="date"
+                    value={scheduleDate}
+                    onChange={(e) => setScheduleDate(e.target.value)}
+                    className="w-full rounded-xl border border-[#E3EBE7] bg-[#F7F9F7] px-3 py-2 text-xs text-[#263832] focus:outline-none focus:border-[#2FC3A5] focus:bg-white transition"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-[#263832] mb-1">
+                    Start Time <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    required
+                    type="time"
+                    value={scheduleStartTime}
+                    onChange={(e) => setScheduleStartTime(e.target.value)}
+                    className="w-full rounded-xl border border-[#E3EBE7] bg-[#F7F9F7] px-3 py-2 text-xs text-[#263832] focus:outline-none focus:border-[#2FC3A5] focus:bg-white transition"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-[#263832] mb-1">
+                    End Time <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    required
+                    type="time"
+                    value={scheduleEndTime}
+                    onChange={(e) => setScheduleEndTime(e.target.value)}
+                    className="w-full rounded-xl border border-[#E3EBE7] bg-[#F7F9F7] px-3 py-2 text-xs text-[#263832] focus:outline-none focus:border-[#2FC3A5] focus:bg-white transition"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-[#263832] mb-1">
+                    Location / Venue
+                  </label>
+                  <input
+                    type="text"
+                    value={scheduleLocation}
+                    onChange={(e) => setScheduleLocation(e.target.value)}
+                    placeholder="e.g. Google Meet or Room 204"
+                    className="w-full rounded-xl border border-[#E3EBE7] bg-[#F7F9F7] px-3.5 py-2 text-xs text-[#263832] focus:outline-none focus:border-[#2FC3A5] focus:bg-white transition"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-[#263832] mb-1">
+                    Conference Link
+                  </label>
+                  <input
+                    type="url"
+                    value={scheduleMeetingLink}
+                    onChange={(e) => setScheduleMeetingLink(e.target.value)}
+                    placeholder="https://meet.google.com/..."
+                    className="w-full rounded-xl border border-[#E3EBE7] bg-[#F7F9F7] px-3.5 py-2 text-xs text-[#263832] focus:outline-none focus:border-[#2FC3A5] focus:bg-white transition"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-[#263832] mb-1">
+                  Agenda & Description
+                </label>
+                <textarea
+                  rows={3}
+                  value={scheduleAgenda}
+                  onChange={(e) => setScheduleAgenda(e.target.value)}
+                  placeholder="Summary of schedule topics, deliverables, and goals..."
+                  className="w-full rounded-xl border border-[#E3EBE7] bg-[#F7F9F7] p-3 text-xs text-[#263832] focus:outline-none focus:border-[#2FC3A5] focus:bg-white transition"
+                />
+              </div>
+
+              <div className="mt-5 flex items-center justify-end gap-2 pt-3 border-t border-[#E3EBE7]">
+                <button
+                  type="button"
+                  onClick={() => setShowScheduleModal(false)}
+                  className="rounded-xl px-4 py-2 text-xs font-semibold text-[#637d74] hover:bg-[#F7F9F7] transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingSchedule}
+                  className="rounded-xl bg-[#2FC3A5] px-5 py-2 text-xs font-bold text-white hover:bg-[#28af94] transition shadow-sm disabled:opacity-50"
+                >
+                  {isSubmittingSchedule ? 'Saving Schedule...' : 'Save Schedule to Calendar'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

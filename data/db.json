@@ -504,6 +504,42 @@
       "status": "Scheduled",
       "hasMom": false,
       "createdAt": "2026-10-21T16:37:55.285Z"
+    },
+    {
+      "id": "meet-1793381368734",
+      "title": "Automated Verification Sprint",
+      "departmentId": "digital-operations",
+      "date": "2026-11-04",
+      "startTime": "14:00",
+      "endTime": "15:30",
+      "mode": "Online",
+      "location": "Google Meet",
+      "meetingLink": "https://meet.google.com/verify-test",
+      "agenda": "End-to-end verification of schedule persistence",
+      "objectives": "",
+      "organizerId": "mem-001",
+      "attendeeMemberIds": [],
+      "status": "Scheduled",
+      "hasMom": false,
+      "createdAt": "2026-10-30T17:29:28.734Z"
+    },
+    {
+      "id": "meet-1793381494179",
+      "title": "xyz",
+      "departmentId": "ALL",
+      "date": "2026-10-30",
+      "startTime": "15:00",
+      "endTime": "16:30",
+      "mode": "Online",
+      "location": "Google Meet",
+      "meetingLink": "https://meet.google.com/enactus-sync",
+      "agenda": "efwf",
+      "objectives": "",
+      "organizerId": "mem-001",
+      "attendeeMemberIds": [],
+      "status": "Scheduled",
+      "hasMom": false,
+      "createdAt": "2026-10-30T17:31:34.179Z"
     }
   ],
   "moms": [
@@ -643,6 +679,56 @@
       ],
       "createdAt": "2026-10-22T19:01:46.998Z",
       "updatedAt": "2026-10-22T19:01:46.998Z"
+    },
+    {
+      "id": "mom-1794644621507",
+      "meetingId": "meeting-1794644556398",
+      "departmentId": "digital-operations",
+      "title": "gg8g",
+      "meetingDate": "2026-11-14",
+      "startTime": "15:00",
+      "endTime": "20:36",
+      "meetingType": "Online",
+      "location": "Google Meet",
+      "agenda": "",
+      "objectives": "",
+      "attendeeIds": [
+        "mem-001",
+        "mem-006",
+        "mem-002",
+        "mem-003",
+        "mem-004",
+        "mem-005",
+        "mem-007",
+        "mem-014",
+        "mem-020",
+        "mem-999",
+        "mem-1792533324830",
+        "mem-dev-01",
+        "mem-1792695870930",
+        "mem-1792742124526"
+      ],
+      "absenteeIds": [],
+      "discussionPoints": [
+        {
+          "topic": "Operational Updates",
+          "notes": ""
+        }
+      ],
+      "decisionsMade": [],
+      "actionItems": [],
+      "preparedById": "mem-001",
+      "publicationStatus": "Draft",
+      "isEditedAfterPublishing": false,
+      "revisionHistory": [
+        {
+          "timestamp": "2026-11-14T08:23:41.507Z",
+          "editorId": "mem-001",
+          "note": "Initial draft created."
+        }
+      ],
+      "createdAt": "2026-11-14T08:23:41.507Z",
+      "updatedAt": "2026-11-14T08:23:41.507Z"
     }
   ],
   "attendance": [
@@ -687,6 +773,9 @@
       "status": "Present",
       "markedById": "mem-014",
       "markedAt": "2026-10-19T15:05:00.000Z",
+      "joinTime": "15:08",
+      "leaveTime": "15:52",
+      "durationMinutes": 44,
       "auditTrail": [
         {
           "timestamp": "2026-10-20T21:58:57.060Z",
@@ -713,6 +802,9 @@
       "status": "Present",
       "markedById": "mem-014",
       "markedAt": "2026-10-19T15:05:00.000Z",
+      "joinTime": "15:04",
+      "leaveTime": "16:22",
+      "durationMinutes": 78,
       "auditTrail": [
         {
           "timestamp": "2026-10-20T21:58:57.934Z",
@@ -739,6 +831,9 @@
       "status": "Present",
       "markedById": "mem-001",
       "markedAt": "2026-10-20T21:58:53.335Z",
+      "joinTime": "15:02",
+      "leaveTime": "16:29",
+      "durationMinutes": 87,
       "notes": "Bulk marked Present",
       "auditTrail": [
         {
@@ -1027,6 +1122,188 @@
       "notes": "MANUAL entry marked on 10/22/2026",
       "recordingSource": "manual",
       "auditTrail": []
+    },
+    {
+      "id": "att-1794644621920-mem-001",
+      "meetingId": "meeting-1794644556398",
+      "departmentId": "digital-operations",
+      "memberId": "mem-001",
+      "status": "Late",
+      "markedById": "mem-001",
+      "markedAt": "2026-11-14T08:23:41.920Z",
+      "notes": "Attended 335 min of 336 min meeting",
+      "durationMinutes": 335,
+      "recordingSource": "manual",
+      "auditTrail": []
+    },
+    {
+      "id": "att-1794644621921-mem-006",
+      "meetingId": "meeting-1794644556398",
+      "departmentId": "digital-operations",
+      "memberId": "mem-006",
+      "status": "Present",
+      "markedById": "mem-001",
+      "markedAt": "2026-11-14T08:23:41.921Z",
+      "notes": "Attended 336 min of 336 min meeting",
+      "durationMinutes": 336,
+      "recordingSource": "manual",
+      "auditTrail": []
+    },
+    {
+      "id": "att-1794644621921-mem-002",
+      "meetingId": "meeting-1794644556398",
+      "departmentId": "digital-operations",
+      "memberId": "mem-002",
+      "status": "Present",
+      "markedById": "mem-001",
+      "markedAt": "2026-11-14T08:23:41.921Z",
+      "notes": "Attended 336 min of 336 min meeting",
+      "durationMinutes": 336,
+      "recordingSource": "manual",
+      "auditTrail": []
+    },
+    {
+      "id": "att-1794644621921-mem-003",
+      "meetingId": "meeting-1794644556398",
+      "departmentId": "digital-operations",
+      "memberId": "mem-003",
+      "status": "Present",
+      "markedById": "mem-001",
+      "markedAt": "2026-11-14T08:23:41.921Z",
+      "notes": "Attended 336 min of 336 min meeting",
+      "durationMinutes": 336,
+      "recordingSource": "manual",
+      "auditTrail": []
+    },
+    {
+      "id": "att-1794644621921-mem-004",
+      "meetingId": "meeting-1794644556398",
+      "departmentId": "digital-operations",
+      "memberId": "mem-004",
+      "status": "Present",
+      "markedById": "mem-001",
+      "markedAt": "2026-11-14T08:23:41.921Z",
+      "notes": "Attended 336 min of 336 min meeting",
+      "durationMinutes": 336,
+      "recordingSource": "manual",
+      "auditTrail": []
+    },
+    {
+      "id": "att-1794644621921-mem-005",
+      "meetingId": "meeting-1794644556398",
+      "departmentId": "digital-operations",
+      "memberId": "mem-005",
+      "status": "Present",
+      "markedById": "mem-001",
+      "markedAt": "2026-11-14T08:23:41.921Z",
+      "notes": "Attended 336 min of 336 min meeting",
+      "durationMinutes": 336,
+      "recordingSource": "manual",
+      "auditTrail": []
+    },
+    {
+      "id": "att-1794644621921-mem-007",
+      "meetingId": "meeting-1794644556398",
+      "departmentId": "digital-operations",
+      "memberId": "mem-007",
+      "status": "Present",
+      "markedById": "mem-001",
+      "markedAt": "2026-11-14T08:23:41.921Z",
+      "notes": "Attended 336 min of 336 min meeting",
+      "durationMinutes": 336,
+      "recordingSource": "manual",
+      "auditTrail": []
+    },
+    {
+      "id": "att-1794644621921-mem-014",
+      "meetingId": "meeting-1794644556398",
+      "departmentId": "digital-operations",
+      "memberId": "mem-014",
+      "status": "Present",
+      "markedById": "mem-001",
+      "markedAt": "2026-11-14T08:23:41.921Z",
+      "notes": "Attended 336 min of 336 min meeting",
+      "durationMinutes": 336,
+      "recordingSource": "manual",
+      "auditTrail": []
+    },
+    {
+      "id": "att-1794644621921-mem-020",
+      "meetingId": "meeting-1794644556398",
+      "departmentId": "digital-operations",
+      "memberId": "mem-020",
+      "status": "Present",
+      "markedById": "mem-001",
+      "markedAt": "2026-11-14T08:23:41.921Z",
+      "notes": "Attended 336 min of 336 min meeting",
+      "durationMinutes": 336,
+      "recordingSource": "manual",
+      "auditTrail": []
+    },
+    {
+      "id": "att-1794644621921-mem-999",
+      "meetingId": "meeting-1794644556398",
+      "departmentId": "digital-operations",
+      "memberId": "mem-999",
+      "status": "Present",
+      "markedById": "mem-001",
+      "markedAt": "2026-11-14T08:23:41.921Z",
+      "notes": "Attended 336 min of 336 min meeting",
+      "durationMinutes": 336,
+      "recordingSource": "manual",
+      "auditTrail": []
+    },
+    {
+      "id": "att-1794644621921-mem-1792533324830",
+      "meetingId": "meeting-1794644556398",
+      "departmentId": "digital-operations",
+      "memberId": "mem-1792533324830",
+      "status": "Present",
+      "markedById": "mem-001",
+      "markedAt": "2026-11-14T08:23:41.921Z",
+      "notes": "Attended 336 min of 336 min meeting",
+      "durationMinutes": 336,
+      "recordingSource": "manual",
+      "auditTrail": []
+    },
+    {
+      "id": "att-1794644621921-mem-dev-01",
+      "meetingId": "meeting-1794644556398",
+      "departmentId": "digital-operations",
+      "memberId": "mem-dev-01",
+      "status": "Present",
+      "markedById": "mem-001",
+      "markedAt": "2026-11-14T08:23:41.921Z",
+      "notes": "Attended 336 min of 336 min meeting",
+      "durationMinutes": 336,
+      "recordingSource": "manual",
+      "auditTrail": []
+    },
+    {
+      "id": "att-1794644621921-mem-1792695870930",
+      "meetingId": "meeting-1794644556398",
+      "departmentId": "digital-operations",
+      "memberId": "mem-1792695870930",
+      "status": "Present",
+      "markedById": "mem-001",
+      "markedAt": "2026-11-14T08:23:41.921Z",
+      "notes": "Attended 336 min of 336 min meeting",
+      "durationMinutes": 336,
+      "recordingSource": "manual",
+      "auditTrail": []
+    },
+    {
+      "id": "att-1794644621921-mem-1792742124526",
+      "meetingId": "meeting-1794644556398",
+      "departmentId": "digital-operations",
+      "memberId": "mem-1792742124526",
+      "status": "Present",
+      "markedById": "mem-001",
+      "markedAt": "2026-11-14T08:23:41.921Z",
+      "notes": "Attended 336 min of 336 min meeting",
+      "durationMinutes": 336,
+      "recordingSource": "manual",
+      "auditTrail": []
     }
   ],
   "correctionRequests": [
@@ -1055,6 +1332,18 @@
       "proofUrl": "",
       "status": "Pending",
       "createdAt": "2026-10-23T07:56:39.017Z"
+    },
+    {
+      "id": "cor-1793207092205",
+      "attendanceId": "att-001",
+      "meetingId": "meet-002",
+      "memberId": "mem-007",
+      "currentStatus": "Absent",
+      "requestedStatus": "Excused",
+      "reason": "didnt put attendence",
+      "proofUrl": "",
+      "status": "Pending",
+      "createdAt": "2026-10-28T17:04:52.205Z"
     }
   ],
   "tasks": [
@@ -1191,6 +1480,35 @@
       ],
       "isArchived": false,
       "createdAt": "2026-10-20T22:00:23.355Z"
+    },
+    {
+      "id": "evt-1793379346488",
+      "title": "xyz",
+      "description": "asa",
+      "organizingDepartmentId": "digital-operations",
+      "supportingHrIds": [
+        "mem-014"
+      ],
+      "organizerIds": [
+        "mem-001"
+      ],
+      "venue": "VIPS Campus Auditorium",
+      "startDateTime": "2026-11-05T03:30:00.000Z",
+      "endDateTime": "2026-11-06T12:30:00.000Z",
+      "checklist": [
+        {
+          "id": "chk-1793379346489-0",
+          "task": "Permissions from Dean Office",
+          "isCompleted": true
+        },
+        {
+          "id": "chk-1793379346489-1",
+          "task": "Speaker Invitation Letters",
+          "isCompleted": false
+        }
+      ],
+      "isArchived": false,
+      "createdAt": "2026-10-30T16:55:46.489Z"
     }
   ],
   "announcements": [
@@ -1233,7 +1551,7 @@
       "message": "Pooja Malhotra has registered and is pending approval in the HR Queue.",
       "type": "System",
       "link": "/members",
-      "isRead": false,
+      "isRead": true,
       "createdAt": "2026-10-20T21:55:24.831Z"
     },
     {
@@ -1263,7 +1581,7 @@
       "message": "You have been assigned: \"kk\". Deadline: 2026-10-25.",
       "type": "Task",
       "link": "/tasks",
-      "isRead": false,
+      "isRead": true,
       "createdAt": "2026-10-20T21:59:40.744Z"
     },
     {
@@ -1273,7 +1591,7 @@
       "message": "Event \"egeere\" has been scheduled at VIPS Campus Auditorium.",
       "type": "Announcement",
       "link": "/events",
-      "isRead": false,
+      "isRead": true,
       "createdAt": "2026-10-20T22:00:23.355Z"
     },
     {
@@ -1293,7 +1611,7 @@
       "message": "wfefw...",
       "type": "Announcement",
       "link": "/announcements",
-      "isRead": false,
+      "isRead": true,
       "createdAt": "2026-10-20T22:00:35.731Z"
     },
     {
@@ -1423,7 +1741,7 @@
       "message": "You are invited to \"abc\" on 2026-10-27 at 16:00.",
       "type": "Meeting",
       "link": "/calendar",
-      "isRead": false,
+      "isRead": true,
       "createdAt": "2026-10-21T16:37:55.285Z"
     },
     {
@@ -1513,7 +1831,7 @@
       "message": "You have been assigned: \"qwdwqd\". Deadline: 2026-10-26.",
       "type": "Task",
       "link": "/tasks",
-      "isRead": false,
+      "isRead": true,
       "createdAt": "2026-10-21T16:46:14.902Z"
     },
     {
@@ -1523,7 +1841,7 @@
       "message": "abcd has registered and is pending approval in the HR Queue.",
       "type": "System",
       "link": "/members",
-      "isRead": false,
+      "isRead": true,
       "createdAt": "2026-10-22T19:04:30.931Z"
     },
     {
@@ -1543,7 +1861,7 @@
       "message": "Ananya Sharma has registered for Core Team Member in digital-operations and is awaiting HR verification.",
       "type": "System",
       "link": "/members",
-      "isRead": false,
+      "isRead": true,
       "createdAt": "2026-10-23T07:46:52.819Z"
     },
     {
@@ -1585,6 +1903,36 @@
       "link": "/dashboard",
       "isRead": false,
       "createdAt": "2026-10-23T07:57:18.174Z"
+    },
+    {
+      "id": "notif-1793207092205-mem-006",
+      "recipientMemberId": "mem-006",
+      "title": "Attendance Correction Request",
+      "message": "Member has submitted a correction request for meeting #meet-002.",
+      "type": "Attendance",
+      "link": "/attendance",
+      "isRead": false,
+      "createdAt": "2026-10-28T17:04:52.205Z"
+    },
+    {
+      "id": "notif-1793379346489-mem-001",
+      "recipientMemberId": "mem-001",
+      "title": "New Society Event Scheduled",
+      "message": "Event \"xyz\" has been scheduled at VIPS Campus Auditorium.",
+      "type": "Announcement",
+      "link": "/events",
+      "isRead": true,
+      "createdAt": "2026-10-30T16:55:46.489Z"
+    },
+    {
+      "id": "notif-1793379346489-mem-014",
+      "recipientMemberId": "mem-014",
+      "title": "New Society Event Scheduled",
+      "message": "Event \"xyz\" has been scheduled at VIPS Campus Auditorium.",
+      "type": "Announcement",
+      "link": "/events",
+      "isRead": false,
+      "createdAt": "2026-10-30T16:55:46.489Z"
     }
   ],
   "settings": {

@@ -73,21 +73,6 @@ export function Sidebar({
       icon: Calendar,
     },
     {
-      label: 'Task Management',
-      href: '/tasks',
-      icon: CheckSquare,
-    },
-    {
-      label: 'Society Leaderboard',
-      href: '/leaderboard',
-      icon: Trophy,
-    },
-    {
-      label: 'Departments (8 Hubs)',
-      href: '/departments',
-      icon: Building2,
-    },
-    {
       label: 'Audit Log',
       href: '/audit',
       icon: ShieldCheck,

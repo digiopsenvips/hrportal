@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Member, Department } from '@/types';
 import { useAuth } from '@/context/AuthContext';
 import { useData } from '@/context/DataContext';
-import { calculateMemberAttendance } from '@/lib/calculations';
+import { calculateMemberAttendance, calculateAttendanceDuration } from '@/lib/calculations';
 import {
   X,
   Shield,
@@ -22,9 +22,14 @@ import {
 interface MemberDetailModalProps {
   member: Member | null;
   onClose: () => void;
+  hideTasksAndAttendance?: boolean;
 }
 
-export function MemberDetailModal({ member, onClose }: MemberDetailModalProps) {
+export function MemberDetailModal({
+  member,
+  onClose,
+  hideTasksAndAttendance = false,
+}: MemberDetailModalProps) {
   const { currentUser, permissions } = useAuth();
   const { departments, tasks, meetings, attendance, settings, updateMember, refreshAll } = useData();
 
@@ -50,6 +55,9 @@ export function MemberDetailModal({ member, onClose }: MemberDetailModalProps) {
   const memberTasks = tasks.filter((t) => t.assignedMemberId === member.id);
   const completedTasks = memberTasks.filter((t) => t.status === 'Completed');
   const pendingTasks = memberTasks.filter((t) => t.status !== 'Completed');
+
+  // Member's individual meeting attendance records
+  const memberAttendanceRecords = attendance.filter((a) => a.memberId === member.id);
 
   // Privacy rule checking:
   const isAuthorizedToViewSensitive =
@@ -128,21 +136,25 @@ export function MemberDetailModal({ member, onClose }: MemberDetailModalProps) {
           </div>
 
           {/* Quick Stats Grid */}
-          <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="rounded-2xl border border-[#E3EBE7] bg-[#F7F9F7] p-3 text-center">
-              <div className="text-[11px] font-semibold text-[#637d74]">Attendance</div>
-              <div className="text-lg font-black text-[#2FC3A5]">{attendanceStats.percentage}%</div>
-              <div className="text-[10px] text-[#8a9e96]">
-                {attendanceStats.attended} / {attendanceStats.totalEligible} meetings
-              </div>
-            </div>
-            <div className="rounded-2xl border border-[#E3EBE7] bg-[#F7F9F7] p-3 text-center">
-              <div className="text-[11px] font-semibold text-[#637d74]">Tasks Completed</div>
-              <div className="text-lg font-black text-[#0D5143]">{completedTasks.length}</div>
-              <div className="text-[10px] text-[#8a9e96]">
-                {pendingTasks.length} pending
-              </div>
-            </div>
+          <div className={`mt-6 grid ${hideTasksAndAttendance ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-4'} gap-3`}>
+            {!hideTasksAndAttendance && (
+              <>
+                <div className="rounded-2xl border border-[#E3EBE7] bg-[#F7F9F7] p-3 text-center">
+                  <div className="text-[11px] font-semibold text-[#637d74]">Attendance</div>
+                  <div className="text-lg font-black text-[#2FC3A5]">{attendanceStats.percentage}%</div>
+                  <div className="text-[10px] text-[#8a9e96]">
+                    {attendanceStats.attended} / {attendanceStats.totalEligible} meetings
+                  </div>
+                </div>
+                <div className="rounded-2xl border border-[#E3EBE7] bg-[#F7F9F7] p-3 text-center">
+                  <div className="text-[11px] font-semibold text-[#637d74]">Tasks Completed</div>
+                  <div className="text-lg font-black text-[#0D5143]">{completedTasks.length}</div>
+                  <div className="text-[10px] text-[#8a9e96]">
+                    {pendingTasks.length} pending
+                  </div>
+                </div>
+              </>
+            )}
             <div className="rounded-2xl border border-[#E3EBE7] bg-[#F7F9F7] p-3 text-center">
               <div className="text-[11px] font-semibold text-[#637d74]">Semester</div>
               <div className="text-lg font-black text-[#263832]">Sem {member.currentSemester}</div>
@@ -166,19 +178,12 @@ export function MemberDetailModal({ member, onClose }: MemberDetailModalProps) {
                 <div>
                   <label className="text-[11px] text-[#263832] font-semibold">Hierarchy Role</label>
                   <select
-                    value={selectedRole}
+                    value={selectedRole === 'developer' ? 'developer' : 'general_member'}
                     onChange={(e) => setSelectedRole(e.target.value as any)}
                     className="mt-1 w-full rounded-xl border border-[#E3EBE7] bg-white px-3 py-1.5 text-xs text-[#263832] focus:outline-none focus:border-[#2FC3A5]"
                   >
-                    <option value="president">President (Level 1)</option>
-                    <option value="vp_1">Vice President 1 (Operations)</option>
-                    <option value="vp_2">Vice President 2 (PR & External)</option>
-                    <option value="vp_3">Vice President 3 (Strategy)</option>
-                    <option value="secretary">Secretary (Level 3)</option>
-                    <option value="hr_head">HR Department Head (Level 4)</option>
-                    <option value="dept_head">Department Head (Level 5)</option>
-                    <option value="secondary_hr">Secondary HR Rep (Level 6)</option>
-                    <option value="general_member">General Member (Level 7)</option>
+                    <option value="general_member">Core Members</option>
+                    <option value="developer">Developers</option>
                   </select>
                 </div>
                 <div>
@@ -274,43 +279,129 @@ export function MemberDetailModal({ member, onClose }: MemberDetailModalProps) {
           </div>
 
           {/* Member's Assigned Tasks */}
-          <div className="mt-6">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-[#637d74] mb-3">
-              Assigned Tasks ({memberTasks.length})
-            </h3>
-            {memberTasks.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-[#E3EBE7] p-4 text-center text-xs text-[#8a9e96]">
-                No tasks assigned to this member yet.
-              </div>
-            ) : (
-              <div className="space-y-2 max-h-48 overflow-y-auto pr-1 scrollbar-thin">
-                {memberTasks.map((t) => (
-                  <div
-                    key={t.id}
-                    className="flex items-center justify-between rounded-xl border border-[#E3EBE7] bg-white p-3 shadow-xs"
-                  >
-                    <div>
-                      <div className="text-xs font-semibold text-[#263832]">{t.title}</div>
-                      <div className="text-[10px] text-[#637d74]">
-                        {t.category} • Deadline: {t.deadline} • {t.actualEffortHours} hrs logged
-                      </div>
-                    </div>
-                    <span
-                      className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
-                        t.status === 'Completed'
-                          ? 'bg-[#E7F3D7] text-[#0D5143]'
-                          : t.status === 'In Progress'
-                          ? 'bg-blue-50 text-blue-700'
-                          : 'bg-amber-50 text-amber-700'
-                      }`}
+          {!hideTasksAndAttendance && (
+            <div className="mt-6">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-[#637d74] mb-3">
+                Assigned Tasks ({memberTasks.length})
+              </h3>
+              {memberTasks.length === 0 ? (
+                <div className="rounded-xl border border-dashed border-[#E3EBE7] p-4 text-center text-xs text-[#8a9e96]">
+                  No tasks assigned to this member yet.
+                </div>
+              ) : (
+                <div className="space-y-2 max-h-48 overflow-y-auto pr-1 scrollbar-thin">
+                  {memberTasks.map((t) => (
+                    <div
+                      key={t.id}
+                      className="flex items-center justify-between rounded-xl border border-[#E3EBE7] bg-white p-3 shadow-xs"
                     >
-                      {t.status}
-                    </span>
-                  </div>
-                ))}
+                      <div>
+                        <div className="text-xs font-semibold text-[#263832]">{t.title}</div>
+                        <div className="text-[10px] text-[#637d74]">
+                          {t.category} • Deadline: {t.deadline} • {t.actualEffortHours} hrs logged
+                        </div>
+                      </div>
+                      <span
+                        className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
+                          t.status === 'Completed'
+                            ? 'bg-[#E7F3D7] text-[#0D5143]'
+                            : t.status === 'In Progress'
+                            ? 'bg-blue-50 text-blue-700'
+                            : 'bg-amber-50 text-amber-700'
+                        }`}
+                      >
+                        {t.status}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Member's Meeting Attendance & Attended Duration */}
+          {!hideTasksAndAttendance && (
+            <div className="mt-6">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#637d74]">
+                  Meeting Attendance & Duration ({memberAttendanceRecords.length})
+                </h3>
+                <span className="text-[11px] font-semibold text-[#0D5143]">
+                  {attendanceStats.attended} of {attendanceStats.totalEligible} attended
+                </span>
               </div>
-            )}
-          </div>
+
+              {memberAttendanceRecords.length === 0 ? (
+                <div className="rounded-xl border border-dashed border-[#E3EBE7] p-4 text-center text-xs text-[#8a9e96]">
+                  No meeting attendance records logged yet for this member.
+                </div>
+              ) : (
+                <div className="space-y-2.5 max-h-56 overflow-y-auto pr-1 scrollbar-thin">
+                  {memberAttendanceRecords.map((att) => {
+                    const meeting = meetings.find((m) => m.id === att.meetingId);
+                    const durationInfo = calculateAttendanceDuration(att);
+
+                    return (
+                      <div
+                        key={att.id}
+                        className="rounded-xl border border-[#E3EBE7] bg-white p-3 shadow-xs space-y-1.5"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <div className="text-xs font-bold text-[#263832]">
+                              {meeting ? meeting.title : `Meeting ${att.meetingId}`}
+                            </div>
+                            <div className="text-[11px] text-[#637d74] mt-0.5 flex items-center gap-2">
+                              <span>Date: <strong>{meeting?.date || att.markedAt.slice(0, 10)}</strong></span>
+                              <span>•</span>
+                              <span>Scheduled: {meeting ? `${meeting.startTime} - ${meeting.endTime}` : 'N/A'}</span>
+                            </div>
+                          </div>
+                          <span
+                            className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold shrink-0 ${
+                              att.status === 'Present'
+                                ? 'bg-[#E7F3D7] text-[#0D5143]'
+                                : att.status === 'Late'
+                                ? 'bg-amber-50 text-amber-700'
+                                : att.status === 'Absent'
+                                ? 'bg-rose-50 text-rose-700'
+                                : 'bg-blue-50 text-blue-700'
+                            }`}
+                          >
+                            {att.status}
+                          </span>
+                        </div>
+
+                        {/* Actual Join, Leave & Attended Duration */}
+                        <div className="grid grid-cols-3 gap-2 pt-2 border-t border-[#E3EBE7] text-[11px]">
+                          <div>
+                            <span className="text-[#8a9e96] block text-[10px] uppercase font-semibold">Time Joined</span>
+                            <span className="font-semibold text-[#263832]">{durationInfo.actualJoinTime}</span>
+                          </div>
+                          <div>
+                            <span className="text-[#8a9e96] block text-[10px] uppercase font-semibold">Time Left</span>
+                            <span className="font-semibold text-[#263832]">{durationInfo.actualLeaveTime}</span>
+                          </div>
+                          <div>
+                            <span className="text-[#8a9e96] block text-[10px] uppercase font-semibold">Attended Duration</span>
+                            <span
+                              className={`font-bold ${
+                                durationInfo.durationMinutes !== null
+                                  ? 'text-[#0D5143]'
+                                  : 'text-[#8a9e96] italic'
+                              }`}
+                            >
+                              {durationInfo.formattedDuration}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
