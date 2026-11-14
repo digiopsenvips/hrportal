@@ -49,11 +49,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (savedMemberId) {
         const found = members.find((m) => m.id === savedMemberId);
         if (found) {
-          // Check approval and membership status
           if (found.approvalStatus === 'PENDING') {
             setCurrentUser(found);
             setIsLoading(false);
-            if (pathname !== '/pending-approval') router.push('/pending-approval');
             return;
           }
           if (found.membershipStatus === 'ACTIVE') {
@@ -64,18 +62,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
-      // No valid active session
       setCurrentUser(null);
       setIsLoading(false);
-
-      const publicPaths = ['/login', '/register', '/pending-approval'];
-      if (!publicPaths.includes(pathname)) {
-        router.push('/login');
-      }
     };
 
     initAuth();
-  }, [pathname, router]);
+  }, []);
+
+  useEffect(() => {
+    if (isLoading) return;
+
+    const publicPaths = ['/login', '/register', '/pending-approval'];
+
+    if (currentUser?.approvalStatus === 'PENDING' && pathname !== '/pending-approval') {
+      router.replace('/pending-approval');
+      return;
+    }
+
+    if (pathname === '/pending-approval' && currentUser && currentUser.approvalStatus !== 'PENDING') {
+      router.replace('/dashboard');
+      return;
+    }
+
+    if (!publicPaths.includes(pathname) && !currentUser) {
+      router.replace('/login');
+    }
+  }, [currentUser, isLoading, pathname, router]);
 
   const login = async (email: string, password?: string) => {
     try {
