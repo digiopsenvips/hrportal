@@ -6,14 +6,14 @@ import { AttendanceRecord, AttendanceStatus } from '@/types';
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
-  const db = getDatabase();
+  const db = await getDatabase();
   return jsonResponse(db.attendance);
 }
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const db = getDatabase();
+    const db = await getDatabase();
 
     // Support single record or bulk records
     // e.g. { meetingId, departmentId, markedById, records: [{ memberId, status, notes }] }
@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
       }
 
       const marker = db.members.find((m) => m.id === markedById);
-      appendAuditLog({
+      await appendAuditLog({
         userId: markedById,
         userName: marker ? marker.name : 'HR Representative',
         userRole: marker ? marker.role : 'secondary_hr',
@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
         details: `Recorded attendance for ${createdOrUpdated.length} member(s) in meeting ${meetingId}.`,
       });
 
-      saveDatabase(db);
+      await saveDatabase(db, ['attendance']);
       return jsonResponse({ success: true, count: createdOrUpdated.length, records: createdOrUpdated });
     }
 
@@ -120,7 +120,7 @@ export async function POST(req: NextRequest) {
         ],
       };
       db.attendance[existingIdx] = updated;
-      saveDatabase(db);
+      await saveDatabase(db, ['attendance']);
       return jsonResponse(updated);
     }
 
@@ -139,7 +139,7 @@ export async function POST(req: NextRequest) {
     };
 
     db.attendance.push(newRecord);
-    saveDatabase(db);
+    await saveDatabase(db, ['attendance']);
     return jsonResponse(newRecord, 201);
   } catch (err: any) {
     return errorResponse(err.message || 'Failed to record attendance', 500);

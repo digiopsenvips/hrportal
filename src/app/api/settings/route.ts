@@ -5,14 +5,14 @@ import { jsonResponse, errorResponse } from '@/lib/api-response';
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
-  const db = getDatabase();
+  const db = await getDatabase();
   return jsonResponse(db.settings);
 }
 
 export async function PUT(req: NextRequest) {
   try {
     const body = await req.json();
-    const db = getDatabase();
+    const db = await getDatabase();
 
     db.settings = {
       ...db.settings,
@@ -31,7 +31,7 @@ export async function PUT(req: NextRequest) {
       },
     };
 
-    saveDatabase(db);
+    await saveDatabase(db, ['settings']);
     return jsonResponse(db.settings);
   } catch (err: any) {
     return errorResponse(err.message || 'Failed to update settings', 500);

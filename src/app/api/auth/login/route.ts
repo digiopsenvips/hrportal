@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
       return errorResponse('Email and password are required', 400);
     }
 
-    const db = getDatabase();
+    const db = await getDatabase();
     const user = db.members.find(
       (m) => m.email.toLowerCase() === email.toLowerCase() || m.memberId.toLowerCase() === email.toLowerCase()
     );

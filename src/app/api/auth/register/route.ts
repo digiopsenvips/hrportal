@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
       return errorResponse('Department selection is required', 400);
     }
 
-    const db = getDatabase();
+    const db = await getDatabase();
 
     // 2. Prevent duplicate registrations: Check email
     const trimmedEmail = email.trim().toLowerCase();
@@ -136,7 +136,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    saveDatabase(db);
+    await saveDatabase(db, ['members', 'notifications']);
 
     return jsonResponse(
       {

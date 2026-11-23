@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
       return errorResponse('status must be either Approved or Rejected', 400);
     }
 
-    const db = getDatabase();
+    const db = await getDatabase();
     db.momEditRequests = db.momEditRequests || [];
     const requestIndex = db.momEditRequests.findIndex((r) => r.id === requestId);
 
@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
       });
 
       // Audit Log
-      appendAuditLog({
+      await appendAuditLog({
         correlationId: request.id,
         userId: reviewerId,
         userName: reviewerName,
@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
       });
 
       // Audit Log
-      appendAuditLog({
+      await appendAuditLog({
         correlationId: request.id,
         userId: reviewerId,
         userName: reviewerName,
@@ -104,7 +104,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    saveDatabase(db);
+    await saveDatabase(db, ['momEditRequests', 'moms', 'notifications']);
 
     return jsonResponse({
       success: true,

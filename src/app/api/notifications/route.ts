@@ -5,7 +5,7 @@ import { jsonResponse, errorResponse } from '@/lib/api-response';
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
-  const db = getDatabase();
+  const db = await getDatabase();
   const { searchParams } = new URL(req.url);
   const memberId = searchParams.get('memberId');
 
@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   try {
     const body = await req.json();
-    const db = getDatabase();
+    const db = await getDatabase();
 
     // Mark single notification read or mark all for a member
     if (body.markAll && body.memberId) {
@@ -29,7 +29,7 @@ export async function PUT(req: NextRequest) {
           n.isRead = true;
         }
       });
-      saveDatabase(db);
+      await saveDatabase(db, ['notifications']);
       return jsonResponse({ success: true, message: 'All marked as read' });
     }
 
@@ -37,7 +37,7 @@ export async function PUT(req: NextRequest) {
       const notif = db.notifications.find((n) => n.id === body.id);
       if (notif) {
         notif.isRead = true;
-        saveDatabase(db);
+        await saveDatabase(db, ['notifications']);
         return jsonResponse(notif);
       }
     }

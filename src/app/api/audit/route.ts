@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
       return errorResponse('Unauthorized: Please log in to view audit logs.', 401);
     }
 
-    const db = getDatabase();
+    const db = await getDatabase();
     const user = db.members.find((m) => m.id === sessionUserId);
 
     if (!user) {
@@ -101,7 +101,7 @@ export async function POST(req: NextRequest) {
 
     const ipAddress = req.headers.get('x-forwarded-for') || '127.0.0.1';
 
-    const entry = appendAuditLog({
+    const entry = await appendAuditLog({
       correlationId,
       userId: userId || 'system',
       userName: userName || 'System User',

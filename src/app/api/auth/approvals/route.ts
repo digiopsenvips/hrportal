@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
       return errorResponse('Action, memberId, and adminId are required', 400);
     }
 
-    const db = getDatabase();
+    const db = await getDatabase();
 
     // Verify requesting user has HR Admin privileges
     const admin = db.members.find((m) => m.id === adminId);
@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
       return errorResponse('Invalid action specified', 400);
     }
 
-    saveDatabase(db);
+    await saveDatabase(db, ['members', 'notifications']);
     return jsonResponse({ success: true, message: `Action ${action} completed successfully`, member: target });
   } catch (err: any) {
     return errorResponse(err.message || 'Lifecycle management error', 500);

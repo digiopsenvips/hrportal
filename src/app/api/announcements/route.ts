@@ -6,7 +6,7 @@ import { Announcement } from '@/types';
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
-  const db = getDatabase();
+  const db = await getDatabase();
   return jsonResponse(db.announcements);
 }
 
@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
       return errorResponse('Missing required announcement fields', 400);
     }
 
-    const db = getDatabase();
+    const db = await getDatabase();
     const newAnnouncement: Announcement = {
       id: `ann-${Date.now()}`,
       title,
@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    saveDatabase(db);
+    await saveDatabase(db, ['announcements', 'notifications']);
     return jsonResponse(newAnnouncement, 201);
   } catch (err: any) {
     return errorResponse(err.message || 'Failed to post announcement', 500);

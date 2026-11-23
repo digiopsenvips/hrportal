@@ -6,7 +6,7 @@ import { AttendanceCorrectionRequest } from '@/types';
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
-  const db = getDatabase();
+  const db = await getDatabase();
   return jsonResponse(db.correctionRequests);
 }
 
@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
       return errorResponse('Missing required fields for attendance correction request', 400);
     }
 
-    const db = getDatabase();
+    const db = await getDatabase();
 
     const newRequest: AttendanceCorrectionRequest = {
       id: `cor-${Date.now()}`,
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    saveDatabase(db);
+    await saveDatabase(db, ['correctionRequests', 'notifications']);
     return jsonResponse(newRequest, 201);
   } catch (err: any) {
     return errorResponse(err.message || 'Failed to submit correction request', 500);
@@ -67,7 +67,7 @@ export async function PUT(req: NextRequest) {
       return errorResponse('Missing request ID, action, or reviewer ID', 400);
     }
 
-    const db = getDatabase();
+    const db = await getDatabase();
     const reqIndex = db.correctionRequests.findIndex((r) => r.id === id);
     if (reqIndex === -1) {
       return errorResponse('Correction request not found', 404);
@@ -112,7 +112,7 @@ export async function PUT(req: NextRequest) {
       createdAt: new Date().toISOString(),
     });
 
-    saveDatabase(db);
+    await saveDatabase(db, ['correctionRequests', 'attendance', 'notifications']);
     return jsonResponse({ success: true, request });
   } catch (err: any) {
     return errorResponse(err.message || 'Failed to review correction request', 500);

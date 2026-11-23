@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
       return errorResponse('Invalid CSV data provided', 400);
     }
 
-    const db = getDatabase();
+    const db = await getDatabase();
     const lines = csvData
       .split('\n')
       .map((l) => l.trim())
@@ -102,7 +102,7 @@ export async function POST(req: NextRequest) {
     }
 
     db.members.push(...importedMembers);
-    saveDatabase(db);
+    await saveDatabase(db, ['members']);
 
     return jsonResponse({
       success: true,

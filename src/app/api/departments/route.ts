@@ -6,7 +6,7 @@ import { Department } from '@/types';
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
-  const db = getDatabase();
+  const db = await getDatabase();
   return jsonResponse(db.departments);
 }
 
@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
       return errorResponse('Department name is required', 400);
     }
 
-    const db = getDatabase();
+    const db = await getDatabase();
     const slug = body.id || body.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
     const exists = db.departments.some((d) => d.id === slug);
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
     };
 
     db.departments.push(newDept);
-    saveDatabase(db);
+    await saveDatabase(db, ['departments']);
     return jsonResponse(newDept, 201);
   } catch (err: any) {
     return errorResponse(err.message || 'Failed to create department', 500);
@@ -52,7 +52,7 @@ export async function PUT(req: NextRequest) {
       return errorResponse('Department ID is required', 400);
     }
 
-    const db = getDatabase();
+    const db = await getDatabase();
     const index = db.departments.findIndex((d) => d.id === body.id);
     if (index === -1) {
       return errorResponse('Department not found', 404);
@@ -86,7 +86,7 @@ export async function PUT(req: NextRequest) {
       }
     }
 
-    saveDatabase(db);
+    await saveDatabase(db, ['departments', 'members']);
     return jsonResponse(updated);
   } catch (err: any) {
     return errorResponse(err.message || 'Failed to update department', 500);

@@ -6,7 +6,7 @@ import { Meeting } from '@/types';
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
-  const db = getDatabase();
+  const db = await getDatabase();
   return jsonResponse(db.meetings);
 }
 
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
       return errorResponse('Missing required fields for scheduling a meeting', 400);
     }
 
-    const db = getDatabase();
+    const db = await getDatabase();
 
     // Conflict detection:
     // Check if any existing active scheduled meeting on the same date overlaps in time and shares the same offline venue or has overlapping participants
@@ -109,7 +109,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    saveDatabase(db);
+    await saveDatabase(db, ['meetings', 'notifications']);
     return jsonResponse(newMeeting, 201);
   } catch (err: any) {
     return errorResponse(err.message || 'Failed to create meeting', 500);
@@ -123,7 +123,7 @@ export async function PUT(req: NextRequest) {
       return errorResponse('Meeting ID required', 400);
     }
 
-    const db = getDatabase();
+    const db = await getDatabase();
     const index = db.meetings.findIndex((m) => m.id === body.id);
     if (index === -1) {
       return errorResponse('Meeting not found', 404);
@@ -161,7 +161,7 @@ export async function PUT(req: NextRequest) {
       }
     }
 
-    saveDatabase(db);
+    await saveDatabase(db, ['meetings', 'notifications']);
     return jsonResponse(updated);
   } catch (err: any) {
     return errorResponse(err.message || 'Failed to update meeting', 500);

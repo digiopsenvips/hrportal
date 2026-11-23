@@ -6,7 +6,7 @@ import { Task } from '@/types';
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
-  const db = getDatabase();
+  const db = await getDatabase();
   return jsonResponse(db.tasks);
 }
 
@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
       return errorResponse('Missing required fields for task creation', 400);
     }
 
-    const db = getDatabase();
+    const db = await getDatabase();
     const newTask: Task = {
       id: `task-${Date.now()}`,
       title,
@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
       createdAt: new Date().toISOString(),
     });
 
-    saveDatabase(db);
+    await saveDatabase(db, ['tasks', 'notifications']);
     return jsonResponse(newTask, 201);
   } catch (err: any) {
     return errorResponse(err.message || 'Failed to create task', 500);
@@ -75,7 +75,7 @@ export async function PUT(req: NextRequest) {
       return errorResponse('Task ID required', 400);
     }
 
-    const db = getDatabase();
+    const db = await getDatabase();
     const index = db.tasks.findIndex((t) => t.id === body.id);
     if (index === -1) {
       return errorResponse('Task not found', 404);
@@ -117,7 +117,7 @@ export async function PUT(req: NextRequest) {
     }
 
     db.tasks[index] = updated;
-    saveDatabase(db);
+    await saveDatabase(db, ['tasks', 'notifications']);
     return jsonResponse(updated);
   } catch (err: any) {
     return errorResponse(err.message || 'Failed to update task', 500);

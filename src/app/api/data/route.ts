@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   try {
-    const db = getDatabase();
+    const db = await getDatabase();
     return jsonResponse({
       departments: db.departments,
       members: db.members,
@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const db = getDatabase();
+    const db = await getDatabase();
 
     // Reset to defaults if requested
     if (body.action === 'RESET_DATABASE') {
@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
         notifications: INITIAL_NOTIFICATIONS,
         settings: INITIAL_SETTINGS,
       };
-      saveDatabase(resetDb);
+      await saveDatabase(resetDb);
       return jsonResponse({ success: true, message: 'Database reset to initial seed data', data: resetDb });
     }
 

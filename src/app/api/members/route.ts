@@ -6,14 +6,14 @@ import { Member } from '@/types';
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
-  const db = getDatabase();
+  const db = await getDatabase();
   return jsonResponse(db.members);
 }
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const db = getDatabase();
+    const db = await getDatabase();
 
     // Validate required fields
     const primaryDept = body.primaryDepartmentId || body.departmentId;
@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
       createdAt: new Date().toISOString(),
     });
 
-    saveDatabase(db);
+    await saveDatabase(db, ['members', 'notifications']);
     return jsonResponse(newMember, 201);
   } catch (err: any) {
     return errorResponse(err.message || 'Failed to create member', 500);
@@ -96,7 +96,7 @@ export async function PUT(req: NextRequest) {
       return errorResponse('Member ID required', 400);
     }
 
-    const db = getDatabase();
+    const db = await getDatabase();
     const index = db.members.findIndex((m) => m.id === body.id);
     if (index === -1) {
       return errorResponse('Member not found', 404);
@@ -111,7 +111,7 @@ export async function PUT(req: NextRequest) {
     };
 
     db.members[index] = updated;
-    saveDatabase(db);
+    await saveDatabase(db, ['members']);
     return jsonResponse(updated);
   } catch (err: any) {
     return errorResponse(err.message || 'Failed to update member', 500);

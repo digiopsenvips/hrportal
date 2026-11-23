@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   try {
-    const db = getDatabase();
+    const db = await getDatabase();
     const sessionUserId =
       req.cookies.get('enactus_session_user_id')?.value ||
       req.headers.get('x-user-id') ||
@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
       return errorResponse('Missing required fields for MOM (title, departmentId, preparedById)', 400);
     }
 
-    const db = getDatabase();
+    const db = await getDatabase();
     const momId = `mom-${Date.now()}`;
     const preparedBy = db.members.find((m) => m.id === preparedById);
     const preparedByName = preparedBy ? preparedBy.name : 'HR Team';
@@ -166,7 +166,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Append to audit log
-    appendAuditLog({
+    await appendAuditLog({
       userId: preparedById,
       userName: preparedByName,
       userRole: preparedByRole,
@@ -177,7 +177,7 @@ export async function POST(req: NextRequest) {
       details: `MOM "${newMOM.title}" created with status ${newMOM.publicationStatus}.`,
     });
 
-    saveDatabase(db);
+    await saveDatabase(db, ['moms', 'tasks', 'meetings', 'notifications']);
     return jsonResponse(newMOM, 201);
   } catch (err: any) {
     return errorResponse(err.message || 'Failed to create MOM', 500);
@@ -191,7 +191,7 @@ export async function PUT(req: NextRequest) {
       return errorResponse('MOM ID required', 400);
     }
 
-    const db = getDatabase();
+    const db = await getDatabase();
     const index = db.moms.findIndex((m) => m.id === body.id);
     if (index === -1) {
       return errorResponse('MOM not found', 404);
@@ -252,7 +252,7 @@ export async function PUT(req: NextRequest) {
     db.moms[index] = updated;
 
     // Audit log
-    appendAuditLog({
+    await appendAuditLog({
       userId: editorId,
       userName: editorName,
       userRole: editorRole,
@@ -295,7 +295,7 @@ export async function PUT(req: NextRequest) {
       }
     }
 
-    saveDatabase(db);
+    await saveDatabase(db, ['moms', 'notifications']);
     return jsonResponse(updated);
   } catch (err: any) {
     return errorResponse(err.message || 'Failed to update MOM', 500);

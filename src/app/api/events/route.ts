@@ -6,7 +6,7 @@ import { SocietyEvent } from '@/types';
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
-  const db = getDatabase();
+  const db = await getDatabase();
   return jsonResponse(db.events);
 }
 
@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
       return errorResponse('Missing required fields for event creation', 400);
     }
 
-    const db = getDatabase();
+    const db = await getDatabase();
     const newEvent: SocietyEvent = {
       id: `evt-${Date.now()}`,
       title,
@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    saveDatabase(db);
+    await saveDatabase(db, ['events', 'notifications']);
     return jsonResponse(newEvent, 201);
   } catch (err: any) {
     return errorResponse(err.message || 'Failed to create event', 500);
@@ -81,7 +81,7 @@ export async function PUT(req: NextRequest) {
       return errorResponse('Event ID required', 400);
     }
 
-    const db = getDatabase();
+    const db = await getDatabase();
     const index = db.events.findIndex((e) => e.id === body.id);
     if (index === -1) {
       return errorResponse('Event not found', 404);
@@ -94,7 +94,7 @@ export async function PUT(req: NextRequest) {
     };
 
     db.events[index] = updated;
-    saveDatabase(db);
+    await saveDatabase(db, ['events']);
     return jsonResponse(updated);
   } catch (err: any) {
     return errorResponse(err.message || 'Failed to update event', 500);

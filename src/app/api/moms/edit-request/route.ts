@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
       return errorResponse('momId, reason, and userId are mandatory.', 400);
     }
 
-    const db = getDatabase();
+    const db = await getDatabase();
     const mom = db.moms.find((m) => m.id === momId);
     if (!mom) {
       return errorResponse('MOM not found', 404);
@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Append to audit log
-    appendAuditLog({
+    await appendAuditLog({
       correlationId: editRequestId,
       userId,
       userName,
@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
       details: `HR requested edit permission on published MOM "${mom.title}". Changes: ${proposedChanges || 'N/A'}`,
     });
 
-    saveDatabase(db);
+    await saveDatabase(db, ['momEditRequests', 'notifications']);
 
     return jsonResponse({
       success: true,
