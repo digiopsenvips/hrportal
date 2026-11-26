@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/lib/supabase';
 import { Eye, EyeOff, Lock, Mail, ArrowRight, ShieldCheck, AlertCircle } from 'lucide-react';
 
 export default function LoginPage() {
@@ -29,6 +30,25 @@ export default function LoginPage() {
   const handleQuickDemoFill = (demoEmail: string) => {
     setEmail(demoEmail);
     setPassword('Admin@123');
+  };
+
+  const handleGoogleLogin = async () => {
+    if (!supabase) {
+      setErrorMsg('Supabase is not configured on the client.');
+      return;
+    }
+    setErrorMsg('');
+    setIsLoading(true);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${typeof window !== 'undefined' ? window.location.origin : ''}/auth/callback`,
+      },
+    });
+    if (error) {
+      setErrorMsg(error.message);
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -69,8 +89,9 @@ export default function LoginPage() {
           {/* Continue with Google */}
           <button
             type="button"
-            onClick={() => alert('Google OAuth: In development environment, please configure GOOGLE_CLIENT_ID or use Email sign-in with pre-seeded demo accounts below.')}
-            className="flex w-full items-center justify-center gap-3 rounded-2xl border border-[#E3EBE7] bg-white px-4 py-2.5 text-xs font-bold text-[#263832] hover:bg-[#DDF7EF] transition shadow-sm"
+            onClick={handleGoogleLogin}
+            disabled={isLoading}
+            className="flex w-full items-center justify-center gap-3 rounded-2xl border border-[#E3EBE7] bg-white px-4 py-2.5 text-xs font-bold text-[#263832] hover:bg-[#DDF7EF] transition shadow-sm disabled:opacity-50"
           >
             <svg className="h-4 w-4" viewBox="0 0 24 24">
               <path
